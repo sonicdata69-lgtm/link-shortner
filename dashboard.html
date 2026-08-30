@@ -290,16 +290,16 @@ function renderLinks(list) {
     const waText = encodeURIComponent(shortUrl);
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td style="direction:ltr;text-align:right;color:var(--cyan);">${shortUrl}${lock}</td>
-      <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:ltr; text-align:right;">${destShort}</td>
+      <td style="direction:ltr;text-align:right;color:var(--cyan);">${escapeHtml(shortUrl)}${lock}</td>
+      <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:ltr; text-align:right;">${escapeHtml(destShort)}</td>
       <td>${row.clicks}</td>
       <td><div class="row-actions">
-        <button class="icon-btn" data-act="copy" data-url="${shortUrl}" title="${t("copy_btn")}">${COPY_ICON}</button>
+        <button class="icon-btn" data-act="copy" data-url="${escapeHtml(shortUrl)}" title="${t("copy_btn")}">${COPY_ICON}</button>
         <a class="icon-btn" href="https://wa.me/?text=${waText}" target="_blank" rel="noopener" title="WhatsApp">${WHATSAPP_ICON}</a>
         <a class="icon-btn" href="https://twitter.com/intent/tweet?url=${waText}" target="_blank" rel="noopener" title="X">${X_ICON}</a>
-        <button class="icon-btn" data-act="qr" data-url="${shortUrl}" title="${t("qr_btn")}">${QR_ICON}</button>
+        <button class="icon-btn" data-act="qr" data-url="${escapeHtml(shortUrl)}" title="${t("qr_btn")}">${QR_ICON}</button>
         <button class="icon-btn" data-act="stats" data-id="${row.id}" title="${t("stats_btn")}">${STATS_ICON}</button>
-        <button class="icon-btn" data-act="edit" data-id="${row.id}" data-dest="${row.original_url}" data-expires="${row.expires_at || ""}" title="${t("edit_btn")}">${EDIT_ICON}</button>
+        <button class="icon-btn" data-act="edit" data-id="${row.id}" data-dest="${escapeHtml(row.original_url)}" data-expires="${row.expires_at || ""}" title="${t("edit_btn")}">${EDIT_ICON}</button>
         <button class="icon-btn" data-act="delete" data-id="${row.id}" title="${t("delete_btn")}">${DELETE_ICON}</button>
       </div></td>`;
     body.appendChild(tr);

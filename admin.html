@@ -165,7 +165,7 @@ async function loadWithdrawals() {
       : row.status === "approved"
       ? `<button class="btn btn-small" data-act="paid" data-id="${row.id}">${t("mark_paid")}</button>`
       : "—";
-    tr.innerHTML = `<td>${row.email}</td><td>${row.amount} ${t("egp")}</td><td>${methodLabel(row.method)}</td><td style="direction:ltr;">${row.account_details}</td><td>${statusBadge(row.status)}</td><td>${actions}</td>`;
+    tr.innerHTML = `<td>${escapeHtml(row.email)}</td><td>${row.amount} ${t("egp")}</td><td>${methodLabel(row.method)}</td><td style="direction:ltr;">${escapeHtml(row.account_details)}</td><td>${statusBadge(row.status)}</td><td>${actions}</td>`;
     body.appendChild(tr);
   });
   body.querySelectorAll("button[data-act]").forEach(btn => {
@@ -202,7 +202,7 @@ function renderUsers(list) {
     const banned = row.is_banned;
     const banBtn = `<button class="btn btn-small ${banned ? "" : "btn-danger"}" data-act="${banned ? "unban" : "ban"}" data-id="${row.id}">${banned ? t("unban_btn") : t("ban_btn")}</button>`;
     const badge = banned ? `<span class="badge badge-rejected">${t("banned_badge")}</span>` : "";
-    tr.innerHTML = `<td>${row.email} ${badge}</td><td>${(row.balance || 0).toFixed(2)} ${t("egp")}</td><td>${new Date(row.created_at).toLocaleDateString()}</td><td>${banBtn}</td>`;
+    tr.innerHTML = `<td>${escapeHtml(row.email)} ${badge}</td><td>${(row.balance || 0).toFixed(2)} ${t("egp")}</td><td>${new Date(row.created_at).toLocaleDateString()}</td><td>${banBtn}</td>`;
     body.appendChild(tr);
   });
   body.querySelectorAll("button[data-act]").forEach(btn => {
