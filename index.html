@@ -440,7 +440,7 @@
         <div class="referral-stats">
           <div class="stat">
             <div class="stat-label" data-i18n="referral_stat1_label">مكافأة صاحب الدعوة</div>
-            <div class="stat-value" id="referralBonusRate">$—</div>
+            <div class="stat-value">$3</div>
           </div>
           <div class="stat">
             <div class="stat-label" data-i18n="referral_stat2_label">عدد الأصدقاء المدعويين</div>
@@ -621,9 +621,9 @@ async function initReferralSection(profile) {
     return;
   }
 
-  // Generate referral link
+  // Generate referral link (يستخدم referral_code، مش الـ id، عشان يتطابق مع نظام الدفع الفعلي)
   const baseUrl = window.location.origin;
-  const referralLink = `${baseUrl}?ref=${profile.id}`;
+  const referralLink = `${baseUrl}/auth.html?ref=${profile.referral_code}`;
   document.getElementById("referralLink").textContent = referralLink;
 
   // Setup copy button
@@ -644,20 +644,16 @@ async function initReferralSection(profile) {
     }
   });
 
-  // Load referral stats
+  // Load real referral stats from the actual payout system (get_referral_info)
   try {
-    const [{ data: referrals }, { data: settings }] = await Promise.all([
-      sb.from("profiles").select("id").eq("referrer_id", profile.id),
-      sb.from("settings").select("referral_bonus_referrer").eq("id", 1).single()
-    ]);
-
-    const referralCount = referrals ? referrals.length : 0;
-    const bonusRate = (settings && settings.referral_bonus_referrer) || 0;
-    const referralBonus = referralCount * bonusRate; // estimated — actual credit happens per-referral on their first withdrawal
-
-    document.getElementById("referralCount").textContent = referralCount;
-    document.getElementById("referralEarnings").textContent = `$${referralBonus.toFixed(2).replace(/\.00$/, "")}`;
-    document.getElementById("referralBonusRate").textContent = bonusRate ? `$${bonusRate}` : "—";
+    const { data, error } = await sb.rpc("get_referral_info");
+    if (error || !data || !data.ok) {
+      document.getElementById("referralCount").textContent = "0";
+      document.getElementById("referralEarnings").textContent = "$0";
+      return;
+    }
+    document.getElementById("referralCount").textContent = data.referred_count || 0;
+    document.getElementById("referralEarnings").textContent = `$${(data.bonus_earned || 0)}`;
   } catch (err) {
     console.error("Error loading referral stats:", err);
   }
