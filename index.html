@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>zlink | اختصار الروابط</title>
+<title>zlink | اختصار الروابط واربح من كل كليك</title>
+<meta name="description" content="اختصر روابطك الطويلة في ثانية، وحوّل كل كليك عليها لفلوس حقيقية تقدر تسحبها بسهولة.">
+<meta name="theme-color" content="#04141c">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -21,27 +24,34 @@
 <!-- شاشة التحويل + الإعلان (بتظهر لما حد يفتح رابط مختصر) -->
 <div id="redirectScreen" class="redirect-screen hidden">
   <div id="adSlot" style="max-width:100%;"></div>
-  <div class="drop hidden" id="dropIcon"></div>
+  <div class="drop" id="dropIcon"></div>
   <div id="redirectText" data-i18n="redirect_text">بنوصلك للرابط...</div>
   <button class="btn btn-ghost hidden" id="skipBtn" style="min-width:160px;"></button>
-
-  <div id="passwordBox" class="card hidden" style="max-width:380px; text-align:start;">
-    <h2 data-i18n="protected_link_title">الرابط ده محمي بباسورد</h2>
-    <label data-i18n="enter_password_label">اكتب الباسورد للمتابعة</label>
-    <input type="password" id="linkPasswordInput" class="url-input" />
-    <div class="error-msg" id="passwordErr"></div>
-    <button class="btn" id="unlockBtn"><span data-i18n="unlock_btn">دخول</span></button>
-  </div>
 </div>
 
 <div id="mainApp">
   <nav class="topnav">
-    <a href="index.html" class="logo">zlink</a>
+    <a href="index.html" class="logo">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"></path><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"></path></svg>
+      <span>zlink</span>
+    </a>
     <div class="nav-links">
-      <a href="dashboard.html" id="navDashboard" class="hidden" data-i18n="nav_dashboard">لوحتي</a>
-      <a href="admin.html" id="navAdmin" class="hidden" data-i18n="nav_admin">الأدمن</a>
-      <a href="auth.html" id="navLogin" data-i18n="nav_login">دخول</a>
-      <button id="navLogout" class="hidden" data-i18n="nav_logout">خروج</button>
+      <a href="dashboard.html" id="navDashboard" class="hidden">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+        <span data-i18n="nav_dashboard">لوحتي</span>
+      </a>
+      <a href="admin.html" id="navAdmin" class="hidden">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5l-8-3z"></path></svg>
+        <span data-i18n="nav_admin">الأدمن</span>
+      </a>
+      <a href="auth.html" id="navLogin">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+        <span data-i18n="nav_login">دخول</span>
+      </a>
+      <button id="navLogout" class="hidden">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span data-i18n="nav_logout">خروج</span>
+      </button>
       <div class="lang-switch">
         <button class="lang-btn" data-lang="ar">AR</button>
         <button class="lang-btn" data-lang="en">EN</button>
@@ -49,85 +59,96 @@
     </div>
   </nav>
 
-  <div class="page">
-    <div class="wrap">
-      <div class="brand">
-        <div class="logo-eyebrow">ZLINK</div>
-        <h1>zlink</h1>
-        <p data-i18n="brand_tagline">اختصر رابطك واربح من كل كليك</p>
+  <div class="page" style="max-width:960px;">
+    <div class="hero">
+      <div class="logo-eyebrow">ZLINK</div>
+      <h1>zlink</h1>
+      <p data-i18n="brand_tagline">اختصر رابطك واربح من كل كليك</p>
+      <div class="hero-ctas">
+        <button class="btn" id="heroMainCta">
+          <span class="shine"></span>
+          <span id="heroMainCtaLabel" data-i18n="hero_cta_start">ابدأ مجانًا</span>
+        </button>
+        <button class="btn btn-ghost" id="heroHowCta" data-i18n="hero_cta_how">إزاي بيشتغل؟</button>
       </div>
+    </div>
 
-      <div class="stage">
-        <div class="card3d" id="card3d">
-          <div class="face face-front">
-            <label for="longUrl" data-i18n="url_label">الرابط الطويل</label>
-            <input type="text" id="longUrl" class="url-input" data-i18n-placeholder="url_placeholder" placeholder="https://example.com/very/long/link" />
-            <div class="error-msg" id="errorMsg"></div>
-            <button class="btn" id="shortenBtn">
-              <span class="shine"></span>
-              <span data-i18n="shorten_btn">اختصر الرابط</span>
-            </button>
-            <div class="success-badge" id="loginHint" data-i18n="login_hint">سجّل دخولك عشان تربح فلوس من روابطك</div>
-          </div>
+    <div class="features">
+      <div class="feature-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <h3 data-i18n="feature1_title">اختصار فوري</h3>
+        <p data-i18n="feature1_desc">حوّل أي رابط طويل لرابط قصير وسهل المشاركة في ثانية واحدة.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10M9.5 9.5c0-1.4 1.1-2.5 2.5-2.5s2.5 1 2.5 2-1 1.8-2.5 2.3c-1.5.5-2.5 1.1-2.5 2.5 0 1.1 1.1 2.2 2.5 2.2s2.5-1 2.5-2.2"></path></svg>
+        <h3 data-i18n="feature2_title">اربح من كل كليك</h3>
+        <p data-i18n="feature2_desc">كل كليك على روابطك بيتحول لفلوس حقيقية تقدر تسحبها في أي وقت.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><rect x="7" y="12" width="3" height="6"></rect><rect x="12" y="8" width="3" height="10"></rect><rect x="17" y="5" width="3" height="13"></rect></svg>
+        <h3 data-i18n="feature3_title">تحكم كامل</h3>
+        <p data-i18n="feature3_desc">تابع روابطك وكليكاتك وأرباحك كلها من لوحة تحكم واحدة بسيطة.</p>
+      </div>
+    </div>
 
-          <div class="face face-back">
-            <label data-i18n="result_label">رابطك الجديد جاهز</label>
-            <div class="result-url" id="resultUrl">—</div>
-            <div class="success-badge" id="copiedMsg" data-i18n="copy_hint">دوس عليه للنسخ</div>
-            <button class="btn btn-ghost" id="againBtn" data-i18n="again_btn">اختصار رابط تاني</button>
-          </div>
+    <div class="steps" id="howSection">
+      <h2 data-i18n="steps_title">إزاي تبدأ؟</h2>
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div>
+          <h3 data-i18n="step1_title">اعمل حساب</h3>
+          <p data-i18n="step1_desc">سجّل مجانًا في ثواني، من غير أي تعقيد.</p>
         </div>
       </div>
-
-      <footer data-i18n="footer_text">zlink — اختصار روابط واربح</footer>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div>
+          <h3 data-i18n="step2_title">اختصر روابطك</h3>
+          <p data-i18n="step2_desc">من لوحة التحكم، حط أي رابط طويل واحصل على نسخة مختصرة فورًا.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div>
+          <h3 data-i18n="step3_title">اربح مع كل كليك</h3>
+          <p data-i18n="step3_desc">شارك روابطك في أي مكان، وكل ما حد يدوس عليها هتكسب فلوس.</p>
+        </div>
+      </div>
     </div>
+
+    <footer data-i18n="footer_text">zlink — اختصار روابط واربح</footer>
   </div>
 </div>
 
 <script src="shared.js"></script>
 <script>
-function randomCode(len = 6) {
-  const chars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let out = "";
-  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
-  return out;
-}
-
-function normalizeUrl(v) {
-  v = v.trim();
-  if (!v) return null;
-  if (!/^https?:\/\//i.test(v)) v = "https://" + v;
-  try { new URL(v); return v; } catch (e) { return null; }
-}
-
-async function createShortLink(originalUrl) {
-  const { data: { user } } = await sb.auth.getUser();
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const code = randomCode(6);
-    const { error } = await sb.from("links").insert({
-      short_code: code,
-      original_url: originalUrl,
-      owner_id: user ? user.id : null
-    });
-    if (!error) return code;
-    if (error.code !== "23505") throw error; // 23505 = unique_violation, try again
-  }
-  throw new Error("تعذر إنشاء رابط فريد");
-}
-
 const RESERVED_PATHS = ["", "index.html", "auth.html", "dashboard.html", "admin.html"];
 
-function showNotFound(expired) {
-  document.getElementById("redirectText").textContent = expired ? t("link_expired") : t("link_not_found");
-}
+async function handleRoute() {
+  const path = location.pathname.replace(/^\/+/, "");
+  if (RESERVED_PATHS.includes(path)) return; // homepage, show the landing page
 
-async function proceedWithAd(target) {
-  document.getElementById("dropIcon").classList.remove("hidden");
+  document.getElementById("mainApp").classList.add("hidden");
+  const screen = document.getElementById("redirectScreen");
+  screen.classList.remove("hidden");
+
+  const { data, error } = await sb.rpc("register_click", { p_short_code: path });
+
+  if (error || !data || !data.found) {
+    document.getElementById("redirectText").textContent = t("link_not_found");
+    document.getElementById("dropIcon").style.animation = "none";
+    document.getElementById("dropIcon").style.opacity = "0.4";
+    return;
+  }
+
+  const target = data.original_url;
   const { data: settings } = await sb.from("settings").select("ad_html, ad_seconds").eq("id", 1).single();
   const adSeconds = (settings && settings.ad_seconds) || 0;
   const adHtml = (settings && settings.ad_html) || "";
 
-  if (adHtml) document.getElementById("adSlot").innerHTML = adHtml;
+  if (adHtml) {
+    document.getElementById("adSlot").innerHTML = adHtml;
+  }
 
   if (adSeconds > 0) {
     const skipBtn = document.getElementById("skipBtn");
@@ -151,96 +172,25 @@ async function proceedWithAd(target) {
   }
 }
 
-async function handleRoute() {
-  const path = location.pathname.replace(/^\/+/, "");
-  if (RESERVED_PATHS.includes(path)) return; // homepage, show the form
-
-  document.getElementById("mainApp").classList.add("hidden");
-  document.getElementById("redirectScreen").classList.remove("hidden");
-  document.getElementById("redirectText").textContent = "";
-
-  const { data, error } = await sb.rpc("get_link_info", { p_short_code: path });
-
-  if (error || !data || !data.found) {
-    showNotFound(data && data.expired);
-    return;
-  }
-
-  if (data.needs_password) {
-    document.getElementById("passwordBox").classList.remove("hidden");
-    document.getElementById("unlockBtn").addEventListener("click", async () => {
-      const pass = document.getElementById("linkPasswordInput").value;
-      const { data: unlocked, error: uErr } = await sb.rpc("unlock_link", { p_link_id: data.id, p_password: pass });
-      if (uErr || !unlocked || !unlocked.ok) {
-        document.getElementById("passwordErr").textContent = t("wrong_password");
-        return;
-      }
-      document.getElementById("passwordBox").classList.add("hidden");
-      proceedWithAd(unlocked.original_url);
-    });
-    return;
-  }
-
-  const { data: unlocked, error: uErr } = await sb.rpc("unlock_link", { p_link_id: data.id });
-  if (uErr || !unlocked || !unlocked.ok) {
-    showNotFound(unlocked && unlocked.error === "expired");
-    return;
-  }
-  proceedWithAd(unlocked.original_url);
+function applyHeroCta(profile) {
+  const label = document.getElementById("heroMainCtaLabel");
+  label.setAttribute("data-i18n", profile ? "hero_cta_dashboard" : "hero_cta_start");
+  label.textContent = profile ? t("hero_cta_dashboard") : t("hero_cta_start");
+  document.getElementById("heroMainCta").onclick = () => {
+    location.href = profile ? "dashboard.html" : "auth.html";
+  };
 }
+
+document.getElementById("heroHowCta").addEventListener("click", () => {
+  document.getElementById("howSection").scrollIntoView({ behavior: "smooth" });
+});
 
 (async function init() {
   initLangSwitcher();
   const profile = await updateNav();
-  document.getElementById("loginHint").classList.toggle("hidden", !!profile);
+  applyHeroCta(profile);
   handleRoute();
 })();
-
-const card3d = document.getElementById("card3d");
-const longUrlInput = document.getElementById("longUrl");
-const shortenBtn = document.getElementById("shortenBtn");
-const errorMsg = document.getElementById("errorMsg");
-const resultUrl = document.getElementById("resultUrl");
-const againBtn = document.getElementById("againBtn");
-
-shortenBtn.addEventListener("click", async () => {
-  errorMsg.textContent = "";
-  const normalized = normalizeUrl(longUrlInput.value);
-  if (!normalized) {
-    errorMsg.textContent = t("url_error");
-    return;
-  }
-  shortenBtn.disabled = true;
-  const label = shortenBtn.querySelector("span:last-child");
-  label.textContent = t("shorten_loading");
-  try {
-    const code = await createShortLink(normalized);
-    const fullShort = `${location.origin}/${code}`;
-    resultUrl.textContent = fullShort;
-    resultUrl.dataset.link = fullShort;
-    card3d.classList.add("flipped");
-  } catch (e) {
-    errorMsg.textContent = t("generic_error");
-    console.error(e);
-  } finally {
-    shortenBtn.disabled = false;
-    label.textContent = t("shorten_btn");
-  }
-});
-
-resultUrl.addEventListener("click", () => {
-  const link = resultUrl.dataset.link;
-  if (!link) return;
-  navigator.clipboard?.writeText(link);
-  document.getElementById("copiedMsg").textContent = t("copied");
-  setTimeout(() => { document.getElementById("copiedMsg").textContent = t("copy_hint"); }, 1800);
-});
-
-againBtn.addEventListener("click", () => {
-  card3d.classList.remove("flipped");
-  longUrlInput.value = "";
-  errorMsg.textContent = "";
-});
 </script>
 </body>
 </html>

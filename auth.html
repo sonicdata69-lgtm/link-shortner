@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>zlink | دخول</title>
+<meta name="description" content="سجّل دخولك أو اعمل حساب جديد في zlink عشان تبدأ تختصر روابطك وتربح من كل كليك.">
+<meta name="theme-color" content="#04141c">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -19,12 +22,27 @@
 <div class="ripple-overlay"></div>
 
 <nav class="topnav">
-  <a href="index.html" class="logo">zlink</a>
+  <a href="index.html" class="logo">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"></path><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"></path></svg>
+    <span>zlink</span>
+  </a>
   <div class="nav-links">
-    <a href="dashboard.html" id="navDashboard" class="hidden" data-i18n="nav_dashboard">لوحتي</a>
-    <a href="admin.html" id="navAdmin" class="hidden" data-i18n="nav_admin">الأدمن</a>
-    <a href="auth.html" id="navLogin" data-i18n="nav_login">دخول</a>
-    <button id="navLogout" class="hidden" data-i18n="nav_logout">خروج</button>
+    <a href="dashboard.html" id="navDashboard" class="hidden">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+      <span data-i18n="nav_dashboard">لوحتي</span>
+    </a>
+    <a href="admin.html" id="navAdmin" class="hidden">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5l-8-3z"></path></svg>
+      <span data-i18n="nav_admin">الأدمن</span>
+    </a>
+    <a href="auth.html" id="navLogin">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      <span data-i18n="nav_login">دخول</span>
+    </a>
+    <button id="navLogout" class="hidden">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      <span data-i18n="nav_logout">خروج</span>
+    </button>
     <div class="lang-switch">
       <button class="lang-btn" data-lang="ar">AR</button>
       <button class="lang-btn" data-lang="en">EN</button>
@@ -35,17 +53,20 @@
 <div class="page">
   <div class="wrap">
     <div class="card">
-      <h2 data-i18n="auth_title">دخول / حساب جديد</h2>
+      <div class="auth-toggle">
+        <button type="button" id="toggleLogin" class="active" data-i18n="login_btn">دخول</button>
+        <button type="button" id="toggleSignup" data-i18n="signup_btn">إنشاء حساب</button>
+      </div>
+      <h2 id="authTitle" data-i18n="auth_title">دخول / حساب جديد</h2>
       <label for="email" data-i18n="email_label">البريد الإلكتروني</label>
       <input type="email" id="email" class="url-input" placeholder="you@example.com" />
       <label for="password" data-i18n="password_label">كلمة المرور</label>
       <input type="password" id="password" class="url-input" placeholder="••••••••" />
       <div class="error-msg" id="errorMsg"></div>
-      <button class="btn" id="loginBtn">
+      <button class="btn" id="submitBtn">
         <span class="shine"></span>
-        <span data-i18n="login_btn">دخول</span>
+        <span id="submitBtnLabel" data-i18n="login_btn">دخول</span>
       </button>
-      <button class="btn btn-ghost" id="signupBtn" data-i18n="signup_btn">إنشاء حساب</button>
     </div>
   </div>
 </div>
@@ -55,29 +76,40 @@
 initLangSwitcher();
 updateNav();
 
+let mode = "login"; // or "signup"
+
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const errorMsg = document.getElementById("errorMsg");
+const toggleLogin = document.getElementById("toggleLogin");
+const toggleSignup = document.getElementById("toggleSignup");
+const submitBtnLabel = document.getElementById("submitBtnLabel");
 
-document.getElementById("loginBtn").addEventListener("click", async () => {
+function setMode(newMode) {
+  mode = newMode;
   errorMsg.textContent = "";
-  const { error } = await sb.auth.signInWithPassword({
-    email: emailInput.value.trim(),
-    password: passwordInput.value
-  });
+  toggleLogin.classList.toggle("active", mode === "login");
+  toggleSignup.classList.toggle("active", mode === "signup");
+  const key = mode === "login" ? "login_btn" : "signup_btn";
+  submitBtnLabel.setAttribute("data-i18n", key);
+  submitBtnLabel.textContent = t(key);
+}
+
+toggleLogin.addEventListener("click", () => setMode("login"));
+toggleSignup.addEventListener("click", () => setMode("signup"));
+
+document.getElementById("submitBtn").addEventListener("click", async () => {
+  errorMsg.textContent = "";
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  const { error } = mode === "login"
+    ? await sb.auth.signInWithPassword({ email, password })
+    : await sb.auth.signUp({ email, password });
   if (error) { errorMsg.textContent = t("auth_error"); return; }
   location.href = "dashboard.html";
 });
 
-document.getElementById("signupBtn").addEventListener("click", async () => {
-  errorMsg.textContent = "";
-  const { error } = await sb.auth.signUp({
-    email: emailInput.value.trim(),
-    password: passwordInput.value
-  });
-  if (error) { errorMsg.textContent = t("auth_error"); return; }
-  location.href = "dashboard.html";
-});
+setMode("login");
 </script>
 </body>
 </html>
