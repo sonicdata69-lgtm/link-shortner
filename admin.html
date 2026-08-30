@@ -78,6 +78,9 @@
   </div>
 
   <div class="card tab-panel" id="panel-withdrawals">
+    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+      <button class="btn btn-ghost btn-small" id="exportCsvBtn" data-i18n="export_csv">تصدير CSV</button>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
@@ -96,6 +99,7 @@
   </div>
 
   <div class="card tab-panel hidden" id="panel-users">
+    <input type="text" id="userSearch" class="url-input" data-i18n-placeholder="search_email_placeholder" placeholder="بحث بالإيميل" style="margin-bottom:14px;" />
     <div class="table-wrap">
       <table>
         <thead>
@@ -103,6 +107,7 @@
             <th data-i18n="users_col_email">الإيميل</th>
             <th data-i18n="users_col_balance">الرصيد</th>
             <th data-i18n="users_col_joined">تاريخ التسجيل</th>
+            <th data-i18n="wd_col_actions">إجراء</th>
           </tr>
         </thead>
         <tbody id="usersBody"></tbody>
@@ -117,6 +122,10 @@
     <input type="number" id="rate" class="url-input" step="0.01" />
     <label for="minWithdraw" data-i18n="settings_min_withdraw">أقل مبلغ للسحب</label>
     <input type="number" id="minWithdraw" class="url-input" step="0.01" />
+    <label for="refBonusReferrer" data-i18n="referral_bonus_referrer_label">بونص صاحب الدعوة (جنيه)</label>
+    <input type="number" id="refBonusReferrer" class="url-input" step="0.01" />
+    <label for="refBonusReferred" data-i18n="referral_bonus_referred_label">بونص المدعو الجديد (جنيه)</label>
+    <input type="number" id="refBonusReferred" class="url-input" step="0.01" />
     <label for="adSeconds" data-i18n="settings_ad_seconds">ثواني الانتظار قبل التخطي</label>
     <input type="number" id="adSeconds" class="url-input" />
     <label for="adHtml" data-i18n="settings_ad_html">كود الإعلان (HTML/JS)</label>
@@ -131,6 +140,9 @@
 
 <script src="shared.js"></script>
 <script>
+let lastWithdrawals = [];
+let lastUsers = [];
+
 function statusBadge(status) {
   const cls = { pending: "badge-pending", approved: "badge-approved", rejected: "badge-rejected", paid: "badge-paid" }[status] || "";
   return `<span class="badge ${cls}">${t("status_" + status)}</span>`;
@@ -141,6 +153,7 @@ function methodLabel(m) {
 
 async function loadWithdrawals() {
   const { data, error } = await sb.rpc("admin_list_withdrawals");
+  lastWithdrawals = data || [];
   const body = document.getElementById("withdrawalsBody");
   body.innerHTML = "";
   if (error) return;
@@ -163,17 +176,54 @@ async function loadWithdrawals() {
   });
 }
 
-async function loadUsers() {
-  const { data, error } = await sb.rpc("admin_list_users");
+function downloadCsv(filename, rows, headers) {
+  const escape = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv = [headers.map(escape).join(",")]
+    .concat(rows.map(r => headers.map(h => escape(r[h])).join(",")))
+    .join("\r\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("exportCsvBtn").addEventListener("click", () => {
+  downloadCsv("withdrawals.csv", lastWithdrawals, ["email", "amount", "method", "account_details", "status", "created_at"]);
+});
+
+function renderUsers(list) {
   const body = document.getElementById("usersBody");
   body.innerHTML = "";
-  if (error) return;
-  (data || []).forEach(row => {
+  list.forEach(row => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${row.email}</td><td>${(row.balance || 0).toFixed(2)} ${t("egp")}</td><td>${new Date(row.created_at).toLocaleDateString()}</td>`;
+    const banned = row.is_banned;
+    const banBtn = `<button class="btn btn-small ${banned ? "" : "btn-danger"}" data-act="${banned ? "unban" : "ban"}" data-id="${row.id}">${banned ? t("unban_btn") : t("ban_btn")}</button>`;
+    const badge = banned ? `<span class="badge badge-rejected">${t("banned_badge")}</span>` : "";
+    tr.innerHTML = `<td>${row.email} ${badge}</td><td>${(row.balance || 0).toFixed(2)} ${t("egp")}</td><td>${new Date(row.created_at).toLocaleDateString()}</td><td>${banBtn}</td>`;
     body.appendChild(tr);
   });
+  body.querySelectorAll("button[data-act]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await sb.rpc("admin_set_user_banned", { p_user_id: btn.dataset.id, p_banned: btn.dataset.act === "ban" });
+      loadUsers();
+    });
+  });
 }
+
+async function loadUsers() {
+  const { data, error } = await sb.rpc("admin_list_users");
+  lastUsers = data || [];
+  if (error) return;
+  renderUsers(lastUsers);
+}
+
+document.getElementById("userSearch").addEventListener("input", function () {
+  const q = this.value.trim().toLowerCase();
+  renderUsers(lastUsers.filter(u => (u.email || "").toLowerCase().includes(q)));
+});
 
 async function loadSettings() {
   const { data } = await sb.from("settings").select("*").eq("id", 1).single();
@@ -183,6 +233,8 @@ async function loadSettings() {
   document.getElementById("minWithdraw").value = data.min_withdrawal;
   document.getElementById("adSeconds").value = data.ad_seconds;
   document.getElementById("adHtml").value = data.ad_html;
+  document.getElementById("refBonusReferrer").value = data.referral_bonus_referrer ?? 5;
+  document.getElementById("refBonusReferred").value = data.referral_bonus_referred ?? 5;
 }
 
 document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
@@ -191,7 +243,9 @@ document.getElementById("saveSettingsBtn").addEventListener("click", async () =>
     p_rate_per_1000: parseFloat(document.getElementById("rate").value) || 0,
     p_min_withdrawal: parseFloat(document.getElementById("minWithdraw").value) || 0,
     p_ad_html: document.getElementById("adHtml").value,
-    p_ad_seconds: parseInt(document.getElementById("adSeconds").value) || 0
+    p_ad_seconds: parseInt(document.getElementById("adSeconds").value) || 0,
+    p_referral_bonus_referrer: parseFloat(document.getElementById("refBonusReferrer").value) || 0,
+    p_referral_bonus_referred: parseFloat(document.getElementById("refBonusReferred").value) || 0
   });
   document.getElementById("settingsSaved").textContent = error ? t("generic_error") : t("settings_saved");
 });

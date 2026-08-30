@@ -204,4 +204,4 @@ th{color:rgba(234,253,251,0.55); font-weight:500; font-size:12px; text-transform
 .icon-btn{background:transparent; border:1px solid var(--glass-border); color:var(--foam); width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; padding:0;}
 .icon-btn .icon{width:16px; height:16px;}
 .icon-btn:hover{border-color:var(--cyan); color:var(--cyan);}
-.row-actions{display:flex; gap:6px;}
+.row-actions{display:flex; gap:6px; flex-wrap:wrap;}

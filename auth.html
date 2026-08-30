@@ -102,14 +102,15 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
   errorMsg.textContent = "";
   const email = emailInput.value.trim();
   const password = passwordInput.value;
+  const refCode = new URLSearchParams(location.search).get("ref");
   const { error } = mode === "login"
     ? await sb.auth.signInWithPassword({ email, password })
-    : await sb.auth.signUp({ email, password });
+    : await sb.auth.signUp({ email, password, options: refCode ? { data: { ref: refCode } } : undefined });
   if (error) { errorMsg.textContent = t("auth_error"); return; }
   location.href = "dashboard.html";
 });
 
-setMode("login");
+setMode(new URLSearchParams(location.search).get("ref") ? "signup" : "login");
 </script>
 </body>
 </html>
