@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>zlink | الأدمن</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+<div class="ripple-overlay"></div>
+
+<nav class="topnav">
+  <a href="index.html" class="logo">zlink</a>
+  <div class="nav-links">
+    <a href="dashboard.html" id="navDashboard" class="hidden" data-i18n="nav_dashboard">لوحتي</a>
+    <a href="admin.html" id="navAdmin" class="hidden" data-i18n="nav_admin">الأدمن</a>
+    <a href="auth.html" id="navLogin" data-i18n="nav_login">دخول</a>
+    <button id="navLogout" class="hidden" data-i18n="nav_logout">خروج</button>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="ar">AR</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page hidden" id="noAccess">
+  <div class="card" style="max-width:480px;">
+    <h2 data-i18n="admin_no_access">الصفحة دي للأدمن بس</h2>
+  </div>
+</div>
+
+<div class="page hidden" id="adminApp">
+  <h1 style="font-family:'Space Grotesk',sans-serif;" data-i18n="admin_title">لوحة تحكم الأدمن</h1>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="withdrawals" data-i18n="tab_withdrawals">طلبات السحب</button>
+    <button class="tab-btn" data-tab="users" data-i18n="tab_users">المستخدمين</button>
+    <button class="tab-btn" data-tab="settings" data-i18n="tab_settings">الإعدادات</button>
+  </div>
+
+  <div class="card tab-panel" id="panel-withdrawals">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="wd_col_email">الإيميل</th>
+            <th data-i18n="wd_col_amount">المبلغ</th>
+            <th data-i18n="wd_col_method">الطريقة</th>
+            <th data-i18n="wd_col_details">البيانات</th>
+            <th data-i18n="wd_col_status">الحالة</th>
+            <th data-i18n="wd_col_actions">إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="withdrawalsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card tab-panel hidden" id="panel-users">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="users_col_email">الإيميل</th>
+            <th data-i18n="users_col_balance">الرصيد</th>
+            <th data-i18n="users_col_joined">تاريخ التسجيل</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card tab-panel hidden" id="panel-settings" style="max-width:600px;">
+    <label for="siteName" data-i18n="settings_site_name">اسم الموقع</label>
+    <input type="text" id="siteName" class="url-input" />
+    <label for="rate" data-i18n="settings_rate">الأرباح لكل 1000 كليك (جنيه)</label>
+    <input type="number" id="rate" class="url-input" step="0.01" />
+    <label for="minWithdraw" data-i18n="settings_min_withdraw">أقل مبلغ للسحب</label>
+    <input type="number" id="minWithdraw" class="url-input" step="0.01" />
+    <label for="adSeconds" data-i18n="settings_ad_seconds">ثواني الانتظار قبل التخطي</label>
+    <input type="number" id="adSeconds" class="url-input" />
+    <label for="adHtml" data-i18n="settings_ad_html">كود الإعلان (HTML/JS)</label>
+    <textarea id="adHtml" rows="6" placeholder="<script>...</script>"></textarea>
+    <div class="success-msg" id="settingsSaved"></div>
+    <button class="btn" id="saveSettingsBtn">
+      <span class="shine"></span>
+      <span data-i18n="save_settings">حفظ الإعدادات</span>
+    </button>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+function statusBadge(status) {
+  const cls = { pending: "badge-pending", approved: "badge-approved", rejected: "badge-rejected", paid: "badge-paid" }[status] || "";
+  return `<span class="badge ${cls}">${t("status_" + status)}</span>`;
+}
+function methodLabel(m) {
+  return METHOD_LABELS[getLang()][m] || m;
+}
+
+async function loadWithdrawals() {
+  const { data, error } = await sb.rpc("admin_list_withdrawals");
+  const body = document.getElementById("withdrawalsBody");
+  body.innerHTML = "";
+  if (error) return;
+  (data || []).forEach(row => {
+    const tr = document.createElement("tr");
+    const actions = row.status === "pending"
+      ? `<button class="btn btn-small" data-act="approved" data-id="${row.id}">${t("approve")}</button>
+         <button class="btn btn-small btn-danger" data-act="rejected" data-id="${row.id}">${t("reject")}</button>`
+      : row.status === "approved"
+      ? `<button class="btn btn-small" data-act="paid" data-id="${row.id}">${t("mark_paid")}</button>`
+      : "—";
+    tr.innerHTML = `<td>${row.email}</td><td>${row.amount} ${t("egp")}</td><td>${methodLabel(row.method)}</td><td style="direction:ltr;">${row.account_details}</td><td>${statusBadge(row.status)}</td><td>${actions}</td>`;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll("button[data-act]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      await sb.rpc("admin_update_withdrawal", { p_id: parseInt(btn.dataset.id), p_status: btn.dataset.act });
+      loadWithdrawals();
+    });
+  });
+}
+
+async function loadUsers() {
+  const { data, error } = await sb.rpc("admin_list_users");
+  const body = document.getElementById("usersBody");
+  body.innerHTML = "";
+  if (error) return;
+  (data || []).forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${row.email}</td><td>${(row.balance || 0).toFixed(2)} ${t("egp")}</td><td>${new Date(row.created_at).toLocaleDateString()}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+async function loadSettings() {
+  const { data } = await sb.from("settings").select("*").eq("id", 1).single();
+  if (!data) return;
+  document.getElementById("siteName").value = data.site_name;
+  document.getElementById("rate").value = data.rate_per_1000;
+  document.getElementById("minWithdraw").value = data.min_withdrawal;
+  document.getElementById("adSeconds").value = data.ad_seconds;
+  document.getElementById("adHtml").value = data.ad_html;
+}
+
+document.getElementById("saveSettingsBtn").addEventListener("click", async () => {
+  const { error } = await sb.rpc("admin_update_settings", {
+    p_site_name: document.getElementById("siteName").value,
+    p_rate_per_1000: parseFloat(document.getElementById("rate").value) || 0,
+    p_min_withdrawal: parseFloat(document.getElementById("minWithdraw").value) || 0,
+    p_ad_html: document.getElementById("adHtml").value,
+    p_ad_seconds: parseInt(document.getElementById("adSeconds").value) || 0
+  });
+  document.getElementById("settingsSaved").textContent = error ? t("generic_error") : t("settings_saved");
+});
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.tab).classList.remove("hidden");
+  });
+});
+
+(async function init() {
+  initLangSwitcher();
+  const profile = await updateNav();
+  if (!profile || !profile.is_admin) {
+    document.getElementById("noAccess").classList.remove("hidden");
+    return;
+  }
+  document.getElementById("adminApp").classList.remove("hidden");
+  loadWithdrawals();
+  loadUsers();
+  loadSettings();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>zlink | لوحتي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+<div class="ripple-overlay"></div>
+
+<nav class="topnav">
+  <a href="index.html" class="logo">zlink</a>
+  <div class="nav-links">
+    <a href="dashboard.html" id="navDashboard" class="hidden" data-i18n="nav_dashboard">لوحتي</a>
+    <a href="admin.html" id="navAdmin" class="hidden" data-i18n="nav_admin">الأدمن</a>
+    <a href="auth.html" id="navLogin" data-i18n="nav_login">دخول</a>
+    <button id="navLogout" class="hidden" data-i18n="nav_logout">خروج</button>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="ar">AR</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <h1 style="font-family:'Space Grotesk',sans-serif;" data-i18n="dash_title">لوحة التحكم</h1>
+
+  <div class="stat-row" style="margin-bottom:20px;">
+    <div class="stat-box">
+      <div class="num" id="balanceNum">0</div>
+      <div class="lbl" data-i18n="balance_label">رصيدك الحالي</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="my_links">روابطي</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="link_col_short">الرابط المختصر</th>
+            <th data-i18n="link_col_clicks">الكليكات</th>
+          </tr>
+        </thead>
+        <tbody id="linksBody"></tbody>
+      </table>
+      <div id="noLinks" class="success-badge hidden" data-i18n="no_links">لسه معملتش أي رابط</div>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:480px;">
+    <h2 data-i18n="withdraw_title">طلب سحب أرباح</h2>
+    <label for="amount" data-i18n="amount_label">المبلغ</label>
+    <input type="number" id="amount" class="url-input" placeholder="0" />
+    <label for="method" data-i18n="method_label">طريقة السحب</label>
+    <select id="method">
+      <option value="vodafone_cash">فودافون كاش</option>
+      <option value="instapay">إنستاباي</option>
+      <option value="binance">باينانس</option>
+    </select>
+    <label for="details" data-i18n="details_label">بيانات الحساب (رقم / يوزر / عنوان محفظة)</label>
+    <input type="text" id="details" class="url-input" placeholder="" />
+    <div class="error-msg" id="wErrorMsg"></div>
+    <div class="success-msg" id="wSuccessMsg"></div>
+    <button class="btn" id="withdrawBtn">
+      <span class="shine"></span>
+      <span data-i18n="withdraw_btn">اطلب السحب</span>
+    </button>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="withdraw_history">طلباتي السابقة</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="wd_col_amount">المبلغ</th>
+            <th data-i18n="wd_col_method">الطريقة</th>
+            <th data-i18n="wd_col_status">الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="withdrawalsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+let currentProfile = null;
+
+function statusBadge(status) {
+  const cls = { pending: "badge-pending", approved: "badge-approved", rejected: "badge-rejected", paid: "badge-paid" }[status] || "";
+  return `<span class="badge ${cls}">${t("status_" + status)}</span>`;
+}
+function methodLabel(m) {
+  return METHOD_LABELS[getLang()][m] || m;
+}
+
+async function loadLinks(userId) {
+  const { data } = await sb.from("links").select("short_code, clicks").eq("owner_id", userId).order("created_at", { ascending: false });
+  const body = document.getElementById("linksBody");
+  body.innerHTML = "";
+  document.getElementById("noLinks").classList.toggle("hidden", !!(data && data.length));
+  (data || []).forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td style="direction:ltr;text-align:right;color:var(--cyan);">${location.origin}/${row.short_code}</td><td>${row.clicks}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+async function loadWithdrawals(userId) {
+  const { data } = await sb.from("withdrawals").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+  const body = document.getElementById("withdrawalsBody");
+  body.innerHTML = "";
+  (data || []).forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${row.amount} ${t("egp")}</td><td>${methodLabel(row.method)}</td><td>${statusBadge(row.status)}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+async function refreshAll() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { location.href = "auth.html"; return; }
+  currentProfile = await getCurrentProfile();
+  document.getElementById("balanceNum").textContent = `${(currentProfile.balance || 0).toFixed(2)} ${t("egp")}`;
+  loadLinks(user.id);
+  loadWithdrawals(user.id);
+}
+
+document.getElementById("withdrawBtn").addEventListener("click", async () => {
+  const wErr = document.getElementById("wErrorMsg");
+  const wOk = document.getElementById("wSuccessMsg");
+  wErr.textContent = ""; wOk.textContent = "";
+  const amount = parseFloat(document.getElementById("amount").value);
+  const method = document.getElementById("method").value;
+  const details = document.getElementById("details").value.trim();
+
+  if (!amount || amount <= 0 || !details) {
+    wErr.textContent = t("url_error");
+    return;
+  }
+  const { data, error } = await sb.rpc("request_withdrawal", {
+    p_amount: amount, p_method: method, p_details: details
+  });
+  if (error || !data || !data.ok) {
+    wErr.textContent = t("generic_error");
+    return;
+  }
+  wOk.textContent = t("withdraw_success");
+  document.getElementById("amount").value = "";
+  document.getElementById("details").value = "";
+  refreshAll();
+});
+
+(async function init() {
+  initLangSwitcher();
+  await updateNav();
+  refreshAll();
+})();
+</script>
+</body>
+</html>
