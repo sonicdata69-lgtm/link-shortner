@@ -11,8 +11,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
 <body>
+
+<div id="bannedOverlay" class="page hidden" style="position:fixed; inset:0; z-index:30; background:rgba(4,20,28,0.95); display:flex; align-items:center; justify-content:center;">
+  <div class="card" style="max-width:380px; text-align:center; align-items:center;">
+    <h2 data-i18n="account_banned_title">حسابك محظور</h2>
+    <p style="color:rgba(234,253,251,0.6); font-size:14px;" data-i18n="account_banned_desc">تواصل مع الدعم لمزيد من التفاصيل.</p>
+    <button class="btn btn-ghost" id="bannedLogoutBtn" data-i18n="nav_logout">خروج</button>
+  </div>
+</div>
 
 <div class="blobs">
   <div class="blob blob1"></div>
@@ -62,11 +71,54 @@
 
   <div class="card" style="max-width:560px;">
     <h2>
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      <span data-i18n="referral_title" style="vertical-align:middle;">ادعُ صحابك واربح</span>
+    </h2>
+    <p style="margin:0 0 6px; font-size:13px; color:rgba(234,253,251,0.6);" data-i18n="referral_desc">شارك رابط الدعوة بتاعك، وكل ما صاحبك يعمل حساب هتاخد فلوس بونص إنت والتنين.</p>
+    <label data-i18n="referral_link_label">رابط الدعوة بتاعك</label>
+    <div class="result-url" id="referralLink" style="cursor:pointer;"></div>
+    <div class="stat-row" style="margin-top:12px;">
+      <div class="stat-box">
+        <div class="num" id="referredCount">0</div>
+        <div class="lbl" data-i18n="referred_count_label">عدد اللي دخلوا بدعوتك</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="referralEarned">0</div>
+        <div class="lbl" data-i18n="referral_earned_label">اللي كسبته من الإحالة</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="max-width:560px;">
+    <h2>
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
       <span data-i18n="add_link_title" style="vertical-align:middle;">أضف رابط جديد</span>
     </h2>
     <label for="longUrl" data-i18n="url_label">الرابط الطويل</label>
     <input type="text" id="longUrl" class="url-input" data-i18n-placeholder="url_placeholder" placeholder="https://example.com/very/long/link" />
+
+    <button type="button" class="btn-ghost btn-small" id="advToggle" style="align-self:flex-start;" data-i18n="advanced_options">خيارات متقدمة (اختياري)</button>
+
+    <div id="advBox" class="hidden" style="display:flex; flex-direction:column; gap:14px;">
+      <div>
+        <label for="customAlias" data-i18n="custom_alias_label">اسم مخصص للرابط (اختياري)</label>
+        <input type="text" id="customAlias" class="url-input" data-i18n-placeholder="custom_alias_placeholder" placeholder="my-link" />
+      </div>
+      <div>
+        <label for="linkPassword" data-i18n="password_protect_label">حماية بباسورد (اختياري)</label>
+        <input type="password" id="linkPassword" class="url-input" data-i18n-placeholder="password_protect_placeholder" />
+      </div>
+      <div>
+        <label for="expirySelect" data-i18n="expiry_label">تاريخ الانتهاء</label>
+        <select id="expirySelect">
+          <option value="" data-i18n="expiry_none">بدون</option>
+          <option value="1" data-i18n="expiry_1d">يوم واحد</option>
+          <option value="7" data-i18n="expiry_7d">7 أيام</option>
+          <option value="30" data-i18n="expiry_30d">30 يوم</option>
+        </select>
+      </div>
+    </div>
+
     <div class="error-msg" id="shortenErr"></div>
     <div class="result-url hidden" id="shortenResult"></div>
     <button class="btn" id="shortenBtn">
@@ -77,11 +129,16 @@
 
   <div class="card">
     <h2 data-i18n="my_links">روابطي</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+      <input type="text" id="linkSearch" class="url-input" style="margin:0; flex:1; min-width:180px;" data-i18n-placeholder="search_links_placeholder" placeholder="دور في روابطك" />
+      <button class="btn-ghost btn-small" id="sortClicksBtn" data-i18n="sort_by_clicks" style="white-space:nowrap;">الأكثر كليكات</button>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th data-i18n="link_col_short">الرابط المختصر</th>
+            <th data-i18n="link_col_dest">الوجهة</th>
             <th data-i18n="link_col_clicks">الكليكات</th>
             <th data-i18n="link_col_actions">إجراءات</th>
           </tr>
@@ -132,12 +189,63 @@
   </div>
 </div>
 
+<!-- QR modal -->
+<div class="page hidden" id="qrModal" style="position:fixed; inset:0; z-index:20; background:rgba(4,20,28,0.85); display:flex; align-items:center; justify-content:center;">
+  <div class="card" style="max-width:320px; text-align:center; align-items:center;">
+    <h2 data-i18n="qr_title">كود QR للرابط</h2>
+    <img id="qrImage" src="" alt="QR" style="width:220px;height:220px;border-radius:12px;background:#fff;padding:8px;" />
+    <button class="btn btn-ghost" id="qrCloseBtn" data-i18n="close_btn">إغلاق</button>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="page hidden" id="editModal" style="position:fixed; inset:0; z-index:20; background:rgba(4,20,28,0.85); display:flex; align-items:center; justify-content:center;">
+  <div class="card" style="max-width:420px;">
+    <h2 data-i18n="edit_link_title">تعديل الرابط</h2>
+    <label data-i18n="new_destination_label">الرابط الأصلي الجديد</label>
+    <input type="text" id="editDest" class="url-input" />
+    <label data-i18n="new_password_label">باسورد جديد (سيبه فاضي عشان تشيله)</label>
+    <input type="password" id="editPassword" class="url-input" />
+    <label data-i18n="expiry_label">تاريخ الانتهاء</label>
+    <select id="editExpiry">
+      <option value="" data-i18n="expiry_none">بدون</option>
+      <option value="1" data-i18n="expiry_1d">يوم واحد</option>
+      <option value="7" data-i18n="expiry_7d">7 أيام</option>
+      <option value="30" data-i18n="expiry_30d">30 يوم</option>
+    </select>
+    <div class="error-msg" id="editErr"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn" id="editSaveBtn" data-i18n="save_btn">حفظ</button>
+      <button class="btn btn-ghost" id="editCancelBtn" data-i18n="cancel_btn">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stats modal -->
+<div class="page hidden" id="statsModal" style="position:fixed; inset:0; z-index:20; background:rgba(4,20,28,0.85); display:flex; align-items:center; justify-content:center;">
+  <div class="card" style="max-width:480px; width:90%;">
+    <h2 data-i18n="stats_title">إحصائيات الكليكات</h2>
+    <canvas id="statsChart" height="200"></canvas>
+    <div id="noStats" class="success-badge hidden" data-i18n="no_stats">لسه مفيش كليكات على الرابط ده</div>
+    <button class="btn btn-ghost" id="statsCloseBtn" data-i18n="close_btn">إغلاق</button>
+  </div>
+</div>
+
 <script src="shared.js"></script>
 <script>
 let currentProfile = null;
+let currentEditId = null;
+let statsChartInstance = null;
 
 const COPY_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 const CHECK_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+const QR_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="14" y1="14" x2="14" y2="21"></line><line x1="21" y1="14" x2="21" y2="21"></line><line x1="17" y1="14" x2="17" y2="17"></line><line x1="14" y1="17" x2="21" y2="17"></line></svg>';
+const STATS_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><rect x="7" y="12" width="3" height="6"></rect><rect x="12" y="8" width="3" height="10"></rect><rect x="17" y="5" width="3" height="13"></rect></svg>';
+const EDIT_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+const DELETE_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+const LOCK_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>';
+const WHATSAPP_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.3A8.4 8.4 0 0 0 4 16.4L3 21l4.7-1.2a8.4 8.4 0 0 0 4.1 1.1h0a8.4 8.4 0 0 0 5.8-14.6ZM12 19.7h0a7 7 0 0 1-3.5-1l-.25-.15-2.6.7.7-2.55-.16-.26a7 7 0 1 1 5.8 3.25Zm3.85-5.2c-.2-.1-1.2-.6-1.4-.65-.2-.08-.3-.1-.45.1-.13.2-.5.65-.62.78-.1.13-.23.14-.43.05-.2-.1-.85-.32-1.63-1a6.1 6.1 0 0 1-1.13-1.4c-.12-.2 0-.3.1-.4.1-.1.2-.24.3-.36.1-.12.13-.2.2-.33.06-.13.03-.25 0-.35-.05-.1-.44-1.08-.6-1.48-.16-.38-.32-.33-.44-.34h-.38c-.13 0-.34.05-.52.25-.18.2-.68.66-.68 1.63 0 .96.7 1.9.8 2.02.1.13 1.4 2.15 3.4 3 .47.2.85.33 1.14.42.48.15.92.13 1.26.08.38-.06 1.2-.5 1.37-.97.17-.48.17-.9.12-1-.05-.08-.18-.13-.38-.23Z"/></svg>';
+const X_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.9L4.4 22H1.3l8.1-9.3L1 2h7.1l4.9 6.4L18.9 2Zm-1.2 18h1.9L7.4 4H5.4l12.3 16Z"/></svg>';
 
 function normalizeUrl(v) {
   v = (v || "").trim();
@@ -153,19 +261,11 @@ function randomCode(len = 6) {
   return out;
 }
 
-async function createShortLink(originalUrl) {
-  const { data: { user } } = await sb.auth.getUser();
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const code = randomCode(6);
-    const { error } = await sb.from("links").insert({
-      short_code: code,
-      original_url: originalUrl,
-      owner_id: user ? user.id : null
-    });
-    if (!error) return code;
-    if (error.code !== "23505") throw error; // 23505 = unique_violation, try again
-  }
-  throw new Error("تعذر إنشاء رابط فريد");
+function expiryDaysToDate(days) {
+  if (!days) return null;
+  const d = new Date();
+  d.setDate(d.getDate() + parseInt(days));
+  return d.toISOString();
 }
 
 function statusBadge(status) {
@@ -176,33 +276,153 @@ function methodLabel(m) {
   return METHOD_LABELS[getLang()][m] || m;
 }
 
-async function loadLinks(userId) {
-  const { data } = await sb.from("links").select("short_code, clicks").eq("owner_id", userId).order("created_at", { ascending: false });
+let allLinks = [];
+let sortDesc = true;
+
+function renderLinks(list) {
   const body = document.getElementById("linksBody");
   body.innerHTML = "";
-  document.getElementById("noLinks").classList.toggle("hidden", !!(data && data.length));
-  (data || []).forEach(row => {
+  document.getElementById("noLinks").classList.toggle("hidden", !!list.length);
+  list.forEach(row => {
     const shortUrl = `${location.origin}/${row.short_code}`;
+    const destShort = row.original_url.length > 30 ? row.original_url.slice(0, 30) + "…" : row.original_url;
+    const lock = row.password_hash ? LOCK_ICON : "";
+    const waText = encodeURIComponent(shortUrl);
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td style="direction:ltr;text-align:right;color:var(--cyan);">${shortUrl}</td>
+      <td style="direction:ltr;text-align:right;color:var(--cyan);">${shortUrl}${lock}</td>
+      <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:ltr; text-align:right;">${destShort}</td>
       <td>${row.clicks}</td>
-      <td><div class="row-actions"><button class="icon-btn" data-act="copy" data-url="${shortUrl}" title="${t("copy_btn")}">${COPY_ICON}</button></div></td>`;
+      <td><div class="row-actions">
+        <button class="icon-btn" data-act="copy" data-url="${shortUrl}" title="${t("copy_btn")}">${COPY_ICON}</button>
+        <a class="icon-btn" href="https://wa.me/?text=${waText}" target="_blank" rel="noopener" title="WhatsApp">${WHATSAPP_ICON}</a>
+        <a class="icon-btn" href="https://twitter.com/intent/tweet?url=${waText}" target="_blank" rel="noopener" title="X">${X_ICON}</a>
+        <button class="icon-btn" data-act="qr" data-url="${shortUrl}" title="${t("qr_btn")}">${QR_ICON}</button>
+        <button class="icon-btn" data-act="stats" data-id="${row.id}" title="${t("stats_btn")}">${STATS_ICON}</button>
+        <button class="icon-btn" data-act="edit" data-id="${row.id}" data-dest="${row.original_url}" data-expires="${row.expires_at || ""}" title="${t("edit_btn")}">${EDIT_ICON}</button>
+        <button class="icon-btn" data-act="delete" data-id="${row.id}" title="${t("delete_btn")}">${DELETE_ICON}</button>
+      </div></td>`;
     body.appendChild(tr);
   });
   wireLinkActions();
 }
 
+function applyLinksFilterSort() {
+  const q = document.getElementById("linkSearch").value.trim().toLowerCase();
+  let list = allLinks.filter(r =>
+    r.short_code.toLowerCase().includes(q) || r.original_url.toLowerCase().includes(q)
+  );
+  list = list.slice().sort((a, b) => sortDesc ? b.clicks - a.clicks : a.clicks - b.clicks);
+  renderLinks(list);
+}
+
+document.getElementById("linkSearch").addEventListener("input", applyLinksFilterSort);
+document.getElementById("sortClicksBtn").addEventListener("click", () => {
+  sortDesc = !sortDesc;
+  applyLinksFilterSort();
+});
+
+async function loadLinks(userId) {
+  const { data } = await sb.from("links").select("id, short_code, original_url, clicks, password_hash, expires_at").eq("owner_id", userId).order("created_at", { ascending: false });
+  allLinks = data || [];
+  applyLinksFilterSort();
+}
+
 function wireLinkActions() {
-  document.querySelectorAll("#linksBody button[data-act='copy']").forEach(btn => {
-    btn.addEventListener("click", () => {
-      navigator.clipboard?.writeText(btn.dataset.url);
-      const original = btn.innerHTML;
-      btn.innerHTML = CHECK_ICON;
-      setTimeout(() => { btn.innerHTML = original; }, 1500);
+  document.querySelectorAll("#linksBody button[data-act]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const act = btn.dataset.act;
+      if (act === "copy") {
+        navigator.clipboard?.writeText(btn.dataset.url);
+        const original = btn.innerHTML;
+        btn.innerHTML = CHECK_ICON;
+        setTimeout(() => { btn.innerHTML = original; }, 1500);
+      } else if (act === "qr") {
+        const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(btn.dataset.url);
+        document.getElementById("qrImage").src = qrUrl;
+        document.getElementById("qrModal").classList.remove("hidden");
+      } else if (act === "delete") {
+        if (!confirm(t("delete_confirm"))) return;
+        await sb.from("links").delete().eq("id", btn.dataset.id);
+        refreshAll();
+      } else if (act === "edit") {
+        currentEditId = btn.dataset.id;
+        document.getElementById("editDest").value = btn.dataset.dest;
+        document.getElementById("editPassword").value = "";
+        document.getElementById("editExpiry").value = "";
+        document.getElementById("editErr").textContent = "";
+        document.getElementById("editModal").classList.remove("hidden");
+      } else if (act === "stats") {
+        openStats(btn.dataset.id);
+      }
     });
   });
 }
+
+async function openStats(linkId) {
+  document.getElementById("statsModal").classList.remove("hidden");
+  const { data, error } = await sb.rpc("get_link_stats", { p_link_id: parseInt(linkId) });
+  const canvas = document.getElementById("statsChart");
+  const noStats = document.getElementById("noStats");
+  if (statsChartInstance) { statsChartInstance.destroy(); statsChartInstance = null; }
+  if (error || !data || !data.length) {
+    canvas.classList.add("hidden");
+    noStats.classList.remove("hidden");
+    return;
+  }
+  canvas.classList.remove("hidden");
+  noStats.classList.add("hidden");
+  statsChartInstance = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: data.map(r => r.day),
+      datasets: [{
+        label: t("link_col_clicks"),
+        data: data.map(r => r.cnt),
+        borderColor: "#39e5d1",
+        backgroundColor: "rgba(57,229,209,0.15)",
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      scales: {
+        x: { ticks: { color: "#eafdfb" }, grid: { color: "rgba(234,253,251,0.1)" } },
+        y: { ticks: { color: "#eafdfb" }, grid: { color: "rgba(234,253,251,0.1)" }, beginAtZero: true }
+      },
+      plugins: { legend: { labels: { color: "#eafdfb" } } }
+    }
+  });
+}
+
+document.getElementById("qrCloseBtn").addEventListener("click", () => document.getElementById("qrModal").classList.add("hidden"));
+document.getElementById("statsCloseBtn").addEventListener("click", () => document.getElementById("statsModal").classList.add("hidden"));
+document.getElementById("editCancelBtn").addEventListener("click", () => document.getElementById("editModal").classList.add("hidden"));
+
+document.getElementById("editSaveBtn").addEventListener("click", async () => {
+  const errEl = document.getElementById("editErr");
+  errEl.textContent = "";
+  const dest = normalizeUrl(document.getElementById("editDest").value);
+  if (!dest) { errEl.textContent = t("url_error"); return; }
+  const newPassword = document.getElementById("editPassword").value;
+  const expiryDays = document.getElementById("editExpiry").value;
+
+  const { error: uErr } = await sb.from("links").update({
+    original_url: dest,
+    expires_at: expiryDaysToDate(expiryDays)
+  }).eq("id", currentEditId);
+
+  if (uErr) { errEl.textContent = t("generic_error"); return; }
+
+  await sb.rpc("set_link_password", { p_link_id: parseInt(currentEditId), p_password: newPassword || null });
+
+  document.getElementById("editModal").classList.add("hidden");
+  refreshAll();
+});
+
+document.getElementById("advToggle").addEventListener("click", () => {
+  document.getElementById("advBox").classList.toggle("hidden");
+});
 
 async function loadWithdrawals(userId) {
   const { data } = await sb.from("withdrawals").select("*").eq("user_id", userId).order("created_at", { ascending: false });
@@ -215,14 +435,44 @@ async function loadWithdrawals(userId) {
   });
 }
 
+async function loadReferral() {
+  const { data, error } = await sb.rpc("get_referral_info");
+  if (error || !data || !data.ok) return;
+  const link = `${location.origin}/auth.html?ref=${data.referral_code}`;
+  const linkEl = document.getElementById("referralLink");
+  linkEl.textContent = link;
+  linkEl.dataset.link = link;
+  document.getElementById("referredCount").textContent = data.referred_count;
+  document.getElementById("referralEarned").textContent = `${Number(data.bonus_earned).toFixed(2)} ${t("egp")}`;
+}
+
+document.getElementById("referralLink").addEventListener("click", function () {
+  const link = this.dataset.link;
+  if (!link) return;
+  navigator.clipboard?.writeText(link);
+  const old = this.textContent;
+  this.textContent = t("copied");
+  setTimeout(() => { this.textContent = old; }, 1500);
+});
+
 async function refreshAll() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) { location.href = "auth.html"; return; }
   currentProfile = await getCurrentProfile();
+  if (currentProfile && currentProfile.is_banned) {
+    document.getElementById("bannedOverlay").classList.remove("hidden");
+    return;
+  }
   document.getElementById("balanceNum").textContent = `${(currentProfile.balance || 0).toFixed(2)} ${t("egp")}`;
   loadLinks(user.id);
   loadWithdrawals(user.id);
+  loadReferral();
 }
+
+document.getElementById("bannedLogoutBtn").addEventListener("click", async () => {
+  await sb.auth.signOut();
+  location.href = "index.html";
+});
 
 document.getElementById("shortenBtn").addEventListener("click", async () => {
   const errEl = document.getElementById("shortenErr");
@@ -233,17 +483,43 @@ document.getElementById("shortenBtn").addEventListener("click", async () => {
   const normalized = normalizeUrl(document.getElementById("longUrl").value);
   if (!normalized) { errEl.textContent = t("url_error"); return; }
 
+  const alias = document.getElementById("customAlias").value.trim();
+  const password = document.getElementById("linkPassword").value;
+  const expiryDays = document.getElementById("expirySelect").value;
+
   const btn = document.getElementById("shortenBtn");
   const label = btn.querySelector("span:last-child");
   btn.disabled = true;
   label.textContent = t("shorten_loading");
+
   try {
-    const code = await createShortLink(normalized);
+    const { data: { user } } = await sb.auth.getUser();
+    let code = alias || randomCode(6);
+
+    const { data: inserted, error } = await sb.from("links").insert({
+      short_code: code,
+      original_url: normalized,
+      owner_id: user ? user.id : null,
+      expires_at: expiryDaysToDate(expiryDays)
+    }).select().single();
+
+    if (error) {
+      errEl.textContent = error.code === "23505" ? t("alias_taken") : t("generic_error");
+      return;
+    }
+
+    if (password) {
+      await sb.rpc("set_link_password", { p_link_id: inserted.id, p_password: password });
+    }
+
     const fullShort = `${location.origin}/${code}`;
     resultEl.textContent = fullShort;
     resultEl.dataset.link = fullShort;
     resultEl.classList.remove("hidden");
     document.getElementById("longUrl").value = "";
+    document.getElementById("customAlias").value = "";
+    document.getElementById("linkPassword").value = "";
+    document.getElementById("expirySelect").value = "";
     refreshAll();
   } catch (e) {
     errEl.textContent = t("generic_error");
