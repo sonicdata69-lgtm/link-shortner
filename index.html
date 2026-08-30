@@ -6,6 +6,14 @@
 <title>zlink | اختصار الروابط واربح من كل كليك</title>
 <meta name="description" content="اختصر روابطك الطويلة في ثانية، وحوّل كل كليك عليها لفلوس حقيقية تقدر تسحبها بسهولة.">
 <meta name="theme-color" content="#04141c">
+<meta property="og:type" content="website">
+<meta property="og:title" content="zlink | اختصار الروابط واربح من كل كليك">
+<meta property="og:description" content="اختصر روابطك الطويلة في ثانية، وحوّل كل كليك عليها لفلوس حقيقية تقدر تسحبها بسهولة.">
+<meta property="og:image" content="/favicon.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zlink | اختصار الروابط واربح من كل كليك">
+<meta name="twitter:description" content="اختصر روابطك الطويلة في ثانية، وحوّل كل كليك عليها لفلوس حقيقية تقدر تسحبها بسهولة.">
+<meta name="twitter:image" content="/favicon.svg">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -24,9 +32,17 @@
 <!-- شاشة التحويل + الإعلان (بتظهر لما حد يفتح رابط مختصر) -->
 <div id="redirectScreen" class="redirect-screen hidden">
   <div id="adSlot" style="max-width:100%;"></div>
-  <div class="drop" id="dropIcon"></div>
+  <div class="drop hidden" id="dropIcon"></div>
   <div id="redirectText" data-i18n="redirect_text">بنوصلك للرابط...</div>
   <button class="btn btn-ghost hidden" id="skipBtn" style="min-width:160px;"></button>
+
+  <div id="passwordBox" class="card hidden" style="max-width:380px; text-align:start;">
+    <h2 data-i18n="protected_link_title">الرابط ده محمي بباسورد</h2>
+    <label data-i18n="enter_password_label">اكتب الباسورد للمتابعة</label>
+    <input type="password" id="linkPasswordInput" class="url-input" />
+    <div class="error-msg" id="passwordErr"></div>
+    <button class="btn" id="unlockBtn"><span data-i18n="unlock_btn">دخول</span></button>
+  </div>
 </div>
 
 <div id="mainApp">
@@ -124,31 +140,26 @@
 <script>
 const RESERVED_PATHS = ["", "index.html", "auth.html", "dashboard.html", "admin.html"];
 
-async function handleRoute() {
-  const path = location.pathname.replace(/^\/+/, "");
-  if (RESERVED_PATHS.includes(path)) return; // homepage, show the landing page
+function showNotFound(expired) {
+  document.getElementById("redirectText").textContent = expired ? t("link_expired") : t("link_not_found");
+}
 
-  document.getElementById("mainApp").classList.add("hidden");
-  const screen = document.getElementById("redirectScreen");
-  screen.classList.remove("hidden");
-
-  const { data, error } = await sb.rpc("register_click", { p_short_code: path });
-
-  if (error || !data || !data.found) {
-    document.getElementById("redirectText").textContent = t("link_not_found");
-    document.getElementById("dropIcon").style.animation = "none";
-    document.getElementById("dropIcon").style.opacity = "0.4";
-    return;
+function getVisitorId() {
+  let id = localStorage.getItem("zlink_visitor_id");
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : (Date.now() + "-" + Math.random().toString(36).slice(2)));
+    localStorage.setItem("zlink_visitor_id", id);
   }
+  return id;
+}
 
-  const target = data.original_url;
+async function proceedWithAd(target) {
+  document.getElementById("dropIcon").classList.remove("hidden");
   const { data: settings } = await sb.from("settings").select("ad_html, ad_seconds").eq("id", 1).single();
   const adSeconds = (settings && settings.ad_seconds) || 0;
   const adHtml = (settings && settings.ad_html) || "";
 
-  if (adHtml) {
-    document.getElementById("adSlot").innerHTML = adHtml;
-  }
+  if (adHtml) document.getElementById("adSlot").innerHTML = adHtml;
 
   if (adSeconds > 0) {
     const skipBtn = document.getElementById("skipBtn");
@@ -170,6 +181,44 @@ async function handleRoute() {
   } else {
     location.replace(target);
   }
+}
+
+async function handleRoute() {
+  const path = location.pathname.replace(/^\/+/, "");
+  if (RESERVED_PATHS.includes(path)) return; // homepage, show the landing page
+
+  document.getElementById("mainApp").classList.add("hidden");
+  document.getElementById("redirectScreen").classList.remove("hidden");
+  document.getElementById("redirectText").textContent = "";
+
+  const { data, error } = await sb.rpc("get_link_info", { p_short_code: path });
+
+  if (error || !data || !data.found) {
+    showNotFound(data && data.expired);
+    return;
+  }
+
+  if (data.needs_password) {
+    document.getElementById("passwordBox").classList.remove("hidden");
+    document.getElementById("unlockBtn").addEventListener("click", async () => {
+      const pass = document.getElementById("linkPasswordInput").value;
+      const { data: unlocked, error: uErr } = await sb.rpc("unlock_link", { p_link_id: data.id, p_password: pass, p_visitor_id: getVisitorId() });
+      if (uErr || !unlocked || !unlocked.ok) {
+        document.getElementById("passwordErr").textContent = t("wrong_password");
+        return;
+      }
+      document.getElementById("passwordBox").classList.add("hidden");
+      proceedWithAd(unlocked.original_url);
+    });
+    return;
+  }
+
+  const { data: unlocked, error: uErr } = await sb.rpc("unlock_link", { p_link_id: data.id, p_visitor_id: getVisitorId() });
+  if (uErr || !unlocked || !unlocked.ok) {
+    showNotFound(unlocked && unlocked.error === "expired");
+    return;
+  }
+  proceedWithAd(unlocked.original_url);
 }
 
 function applyHeroCta(profile) {
