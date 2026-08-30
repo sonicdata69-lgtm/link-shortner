@@ -166,6 +166,15 @@ const I18N = {
     referral_start_btn: "ابدأ أرباحك",
     referral_contact_btn: "تواصل معنا",
     referral_disclaimer: "* تُحتسب المكافأة الفعلية وتُضاف لرصيدك بعد أول عملية سحب يقوم بها صديقك.",
+    referral_desc: "شارك رابط الدعوة بتاعك، وبعد ما صاحبك يعمل أول عملية سحب لأرباحه، هتاخد مكافأة تتضاف لرصيدك تلقائيًا.",
+    referral_link_label: "رابط الدعوة بتاعك",
+    referred_count_label: "عدد اللي دخلوا بدعوتك",
+    referral_earned_label: "اللي كسبته من الإحالة",
+    search_links_placeholder: "دور في روابطك",
+    sort_by_clicks: "الأكثر كليكات",
+    link_col_actions: "إجراءات",
+    account_banned_title: "حسابك محظور",
+    account_banned_desc: "تواصل مع الدعم لمزيد من التفاصيل.",
   },
   en: {
     dir: "ltr",
@@ -327,6 +336,15 @@ const I18N = {
     referral_start_btn: "Start your earnings",
     referral_contact_btn: "Contact us",
     referral_disclaimer: "* The actual reward is credited to your balance after your friend's first withdrawal.",
+    referral_desc: "Share your referral link — once your friend makes their first withdrawal, you'll get a reward added to your balance automatically.",
+    referral_link_label: "Your referral link",
+    referred_count_label: "Friends who joined",
+    referral_earned_label: "Earned from referrals",
+    search_links_placeholder: "Search your links",
+    sort_by_clicks: "Most clicks",
+    link_col_actions: "Actions",
+    account_banned_title: "Your account is banned",
+    account_banned_desc: "Contact support for more details.",
   }
 };
 
