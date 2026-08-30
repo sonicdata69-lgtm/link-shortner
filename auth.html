@@ -102,11 +102,30 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
   errorMsg.textContent = "";
   const email = emailInput.value.trim();
   const password = passwordInput.value;
-  const refCode = new URLSearchParams(location.search).get("ref");
-  const { error } = mode === "login"
-    ? await sb.auth.signInWithPassword({ email, password })
-    : await sb.auth.signUp({ email, password, options: refCode ? { data: { ref: refCode } } : undefined });
-  if (error) { errorMsg.textContent = t("auth_error"); return; }
+  const referrerId = new URLSearchParams(location.search).get("ref"); // ✅ امسك referrer_id من الـ URL
+  
+  if (mode === "login") {
+    // دخول عادي
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { errorMsg.textContent = t("auth_error"); return; }
+  } else {
+    // تسجيل جديد
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) { errorMsg.textContent = t("auth_error"); return; }
+    
+    // ✅ بعد التسجيل الناجح، حفظ referrer_id في profiles
+    if (data.user && referrerId) {
+      const { error: profileError } = await sb
+        .from("profiles")
+        .update({ referrer_id: referrerId })
+        .eq("id", data.user.id);
+      
+      if (profileError) {
+        console.error("Error updating referrer_id:", profileError);
+      }
+    }
+  }
+  
   location.href = "dashboard.html";
 });
 
