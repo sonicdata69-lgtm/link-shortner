@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>zlink | اختصار الروابط واربح من كل كليك</title>
-<meta name="description" content="اختصر روابطك الطويلة في ثانية، وحوّل كل كليك عليها لفلوس حقيقية تقدر تسحبها بسهولة.">
+<title>zlink | اختصار الروابط وربح المال من كل نقرة</title>
+<meta name="description" content="اختصر روابطك الطويلة في ثانية واحدة، وحوّل كل نقرة عليها إلى مال حقيقي يمكنك سحبه بسهولة.">
 <meta name="theme-color" content="#04141c">
 <meta property="og:type" content="website">
-<meta property="og:title" content="zlink | اختصار الروابط واربح من كل كليك">
-<meta property="og:description" content="اختصر روابطك الطويلة في ثانية، وحوّل كل كليك عليها لفلوس حقيقية تقدر تسحبها بسهولة.">
+<meta property="og:title" content="zlink | اختصار الروابط وربح المال من كل نقرة">
+<meta property="og:description" content="اختصر روابطك الطويلة في ثانية واحدة، وحوّل كل نقرة عليها إلى مال حقيقي يمكنك سحبه بسهولة.">
 <meta property="og:image" content="/favicon.svg">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="zlink | اختصار الروابط واربح من كل كليك">
-<meta name="twitter:description" content="اختصر روابطك الطويلة في ثانية، وحوّل كل كليك عليها لفلوس حقيقية تقدر تسحبها بسهولة.">
+<meta name="twitter:title" content="zlink | اختصار الروابط وربح المال من كل نقرة">
+<meta name="twitter:description" content="اختصر روابطك الطويلة في ثانية واحدة، وحوّل كل نقرة عليها إلى مال حقيقي يمكنك سحبه بسهولة.">
 <meta name="twitter:image" content="/favicon.svg">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,15 +33,29 @@
 <div id="redirectScreen" class="redirect-screen hidden">
   <div id="adSlot" style="max-width:100%;"></div>
   <div class="drop hidden" id="dropIcon"></div>
-  <div id="redirectText" data-i18n="redirect_text">بنوصلك للرابط...</div>
+  <div id="redirectText" data-i18n="redirect_text">جارٍ تحويلك إلى الرابط...</div>
   <button class="btn btn-ghost hidden" id="skipBtn" style="min-width:160px;"></button>
 
+  <div class="card" id="aboutUsCard" style="max-width:380px; text-align:start;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--cyan);"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"></path><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"></path></svg>
+      <strong style="font-family:'Space Grotesk',sans-serif; font-size:17px;" data-i18n="about_us_title">عن zlink</strong>
+    </div>
+    <p style="margin:0 0 12px; font-size:13px; color:rgba(234,253,251,0.7);" data-i18n="about_us_desc">
+      zlink منصة لاختصار الروابط، تتيح لك تحويل أي رابط طويل إلى رابط قصير سهل المشاركة، وتحقيق أرباح حقيقية من كل نقرة عليه.
+    </p>
+    <a href="https://wa.me/201220349490" target="_blank" rel="noopener" class="btn btn-ghost btn-small" style="width:fit-content; display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span data-i18n="contact_whatsapp">تواصل معنا عبر واتساب</span>
+    </a>
+  </div>
+
   <div id="passwordBox" class="card hidden" style="max-width:380px; text-align:start;">
-    <h2 data-i18n="protected_link_title">الرابط ده محمي بباسورد</h2>
-    <label data-i18n="enter_password_label">اكتب الباسورد للمتابعة</label>
+    <h2 data-i18n="protected_link_title">هذا الرابط محمي بكلمة مرور</h2>
+    <label data-i18n="enter_password_label">أدخل كلمة المرور للمتابعة</label>
     <input type="password" id="linkPasswordInput" class="url-input" />
     <div class="error-msg" id="passwordErr"></div>
-    <button class="btn" id="unlockBtn"><span data-i18n="unlock_btn">دخول</span></button>
+    <button class="btn" id="unlockBtn"><span data-i18n="unlock_btn">تسجيل الدخول</span></button>
   </div>
 </div>
 
@@ -54,19 +68,19 @@
     <div class="nav-links">
       <a href="dashboard.html" id="navDashboard" class="hidden">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
-        <span data-i18n="nav_dashboard">لوحتي</span>
+        <span data-i18n="nav_dashboard">لوحة التحكم</span>
       </a>
       <a href="admin.html" id="navAdmin" class="hidden">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5l-8-3z"></path></svg>
-        <span data-i18n="nav_admin">الأدمن</span>
+        <span data-i18n="nav_admin">الإدارة</span>
       </a>
       <a href="auth.html" id="navLogin">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-        <span data-i18n="nav_login">دخول</span>
+        <span data-i18n="nav_login">تسجيل الدخول</span>
       </a>
       <button id="navLogout" class="hidden">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-        <span data-i18n="nav_logout">خروج</span>
+        <span data-i18n="nav_logout">تسجيل الخروج</span>
       </button>
       <div class="lang-switch">
         <button class="lang-btn" data-lang="ar">AR</button>
@@ -79,13 +93,13 @@
     <div class="hero">
       <div class="logo-eyebrow">ZLINK</div>
       <h1>zlink</h1>
-      <p data-i18n="brand_tagline">اختصر رابطك واربح من كل كليك</p>
+      <p data-i18n="brand_tagline">اختصر رابطك واربح من كل نقرة</p>
       <div class="hero-ctas">
         <button class="btn" id="heroMainCta">
           <span class="shine"></span>
           <span id="heroMainCtaLabel" data-i18n="hero_cta_start">ابدأ مجانًا</span>
         </button>
-        <button class="btn btn-ghost" id="heroHowCta" data-i18n="hero_cta_how">إزاي بيشتغل؟</button>
+        <button class="btn btn-ghost" id="heroHowCta" data-i18n="hero_cta_how">كيف يعمل الموقع؟</button>
       </div>
     </div>
 
@@ -97,18 +111,18 @@
       </div>
       <div class="feature-card">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10M9.5 9.5c0-1.4 1.1-2.5 2.5-2.5s2.5 1 2.5 2-1 1.8-2.5 2.3c-1.5.5-2.5 1.1-2.5 2.5 0 1.1 1.1 2.2 2.5 2.2s2.5-1 2.5-2.2"></path></svg>
-        <h3 data-i18n="feature2_title">اربح من كل كليك</h3>
-        <p data-i18n="feature2_desc">كل كليك على روابطك بيتحول لفلوس حقيقية تقدر تسحبها في أي وقت.</p>
+        <h3 data-i18n="feature2_title">اربح من كل نقرة</h3>
+        <p data-i18n="feature2_desc">كل نقرة على روابطك تتحول إلى مال حقيقي يمكنك سحبه في أي وقت.</p>
       </div>
       <div class="feature-card">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><rect x="7" y="12" width="3" height="6"></rect><rect x="12" y="8" width="3" height="10"></rect><rect x="17" y="5" width="3" height="13"></rect></svg>
         <h3 data-i18n="feature3_title">تحكم كامل</h3>
-        <p data-i18n="feature3_desc">تابع روابطك وكليكاتك وأرباحك كلها من لوحة تحكم واحدة بسيطة.</p>
+        <p data-i18n="feature3_desc">تابع روابطك ونقراتك وأرباحك جميعًا من لوحة تحكم واحدة بسيطة.</p>
       </div>
     </div>
 
     <div class="steps" id="howSection">
-      <h2 data-i18n="steps_title">إزاي تبدأ؟</h2>
+      <h2 data-i18n="steps_title">كيف تبدأ؟</h2>
       <div class="step-row">
         <div class="step-num">1</div>
         <div>
@@ -126,8 +140,8 @@
       <div class="step-row">
         <div class="step-num">3</div>
         <div>
-          <h3 data-i18n="step3_title">اربح مع كل كليك</h3>
-          <p data-i18n="step3_desc">شارك روابطك في أي مكان، وكل ما حد يدوس عليها هتكسب فلوس.</p>
+          <h3 data-i18n="step3_title">اربح مع كل نقرة</h3>
+          <p data-i18n="step3_desc">شارك روابطك في أي مكان، وكل من ينقر عليها ستكسب مالًا.</p>
         </div>
       </div>
     </div>
