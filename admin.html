@@ -233,8 +233,8 @@ async function loadSettings() {
   document.getElementById("minWithdraw").value = data.min_withdrawal;
   document.getElementById("adSeconds").value = data.ad_seconds;
   document.getElementById("adHtml").value = data.ad_html;
-  document.getElementById("refBonusReferrer").value = data.referral_bonus_referrer ?? 5;
-  document.getElementById("refBonusReferred").value = data.referral_bonus_referred ?? 5;
+  document.getElementById("refBonusReferrer").value = data.referral_bonus_referrer ?? 3;
+  document.getElementById("refBonusReferred").value = data.referral_bonus_referred ?? 0;
 }
 
 document.getElementById("saveSettingsBtn").addEventListener("click", async () => {

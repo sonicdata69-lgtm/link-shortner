@@ -84,9 +84,9 @@ const I18N = {
     hero_cta_dashboard: "الانتقال إلى لوحة التحكم",
     hero_cta_how: "كيف يعمل الموقع؟",
     tagline_main: "مع zlink بدايتك للربح من اختصار الروابط 💸",
-    tagline_reasons: "اسباب اختيارك لينا:",
+    tagline_reasons: "أسباب اختيارك لينا:",
     tagline_reason1: "الثقة والأمان 🔒",
-    tagline_reason2: "تسهيل تجربة الزوار لضمان تجربه سهله",
+    tagline_reason2: "تسهيل تجربة الزوار لضمان تجربة سهلة",
     tagline_reason3: "سحب ارباح يومي بدون تأخير ⚡",
     tagline_reason4: "أفضل عائد CPM 💵",
     tagline_reason5: "دعم فني متواجد طوال اليوم 🧑🏻‍💻",
@@ -148,7 +148,7 @@ const I18N = {
     // Referral section translations
     referral_badge: "عرض خاص لأعضاء الموقع",
     referral_title: "ادعُ أصدقاءك وارِبح مكافآت فورية",
-    referral_subtitle: "احصل على 3 دولارات هدية لكل صديق يقوم بالتسجيل والعمل معنا من خلال رابط الإحالة (الريفيرال) الخاص بك. بعد انضمام صديقك وبدء نشاطه، سيتم تحويل مكافآتك مباشرة وسيتم إضافتها إلى رصيدك فورًا.",
+    referral_subtitle: "احصل على مكافأة نقدية لكل صديق يسجّل ويعمل معنا من خلال رابط الإحالة (الريفيرال) الخاص بك. بعد انضمام صديقك وقيامه بأول عملية سحب لأرباحه، تُضاف مكافأتك تلقائيًا إلى رصيدك.",
     referral_benefit1_title: "الثقة والأمان",
     referral_benefit1_desc: "منصة موثوقة وآمنة لعملائك",
     referral_benefit2_title: "سحب يومي بدون تأخير",
@@ -165,6 +165,7 @@ const I18N = {
     referral_copied: "تم النسخ! ✅",
     referral_start_btn: "ابدأ أرباحك",
     referral_contact_btn: "تواصل معنا",
+    referral_disclaimer: "* تُحتسب المكافأة الفعلية وتُضاف لرصيدك بعد أول عملية سحب يقوم بها صديقك.",
   },
   en: {
     dir: "ltr",
@@ -308,7 +309,7 @@ const I18N = {
     // Referral section translations
     referral_badge: "Special offer for site members",
     referral_title: "Invite friends and earn instant rewards",
-    referral_subtitle: "Get $3 gift for each friend who signs up and works with us through your referral link. After your friend joins and starts activity, your rewards will be transferred directly and added to your balance instantly.",
+    referral_subtitle: "Get a cash reward for every friend who signs up and works with us through your referral link. Once your friend joins and makes their first withdrawal, your reward is added to your balance automatically.",
     referral_benefit1_title: "Trust & Security",
     referral_benefit1_desc: "A reliable and secure platform for your clients",
     referral_benefit2_title: "Daily withdrawal without delay",
@@ -325,6 +326,7 @@ const I18N = {
     referral_copied: "Copied! ✅",
     referral_start_btn: "Start your earnings",
     referral_contact_btn: "Contact us",
+    referral_disclaimer: "* The actual reward is credited to your balance after your friend's first withdrawal.",
   }
 };
 

@@ -369,9 +369,9 @@
     <div class="tagline-section" style="text-align: center; margin-bottom: 60px; padding: 30px; background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(16, 185, 129, 0.1)); border-radius: 16px; border: 1px solid rgba(6, 182, 212, 0.2);">
       <h2 style="font-size: 24px; font-weight: 900; margin: 0 0 16px 0; background: linear-gradient(135deg, #06b6d4, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">مع zlink بدايتك للربح من اختصار الروابط 💸</h2>
       <p style="font-size: 15px; color: rgba(234, 253, 251, 0.8); margin: 0 0 24px 0; line-height: 1.8; max-width: 600px; margin-left: auto; margin-right: auto;">
-        <strong>اسباب اختيارك لينا:</strong><br>
+        <strong>أسباب اختيارك لينا:</strong><br>
         ✅ الثقة والأمان 🔒<br>
-        ✅ تسهيل تجربة الزوار لضمان تجربه سهله<br>
+        ✅ تسهيل تجربة الزوار لضمان تجربة سهلة<br>
         ✅ سحب ارباح يومي بدون تأخير ⚡<br>
         ✅ أفضل عائد CPM 💵<br>
         ✅ دعم فني متواجد طوال اليوم 🧑🏻‍💻
@@ -440,7 +440,7 @@
         <div class="referral-stats">
           <div class="stat">
             <div class="stat-label" data-i18n="referral_stat1_label">مكافأة صاحب الدعوة</div>
-            <div class="stat-value">$3</div>
+            <div class="stat-value" id="referralBonusRate">$—</div>
           </div>
           <div class="stat">
             <div class="stat-label" data-i18n="referral_stat2_label">عدد الأصدقاء المدعويين</div>
@@ -452,6 +452,8 @@
           </div>
         </div>
       </div>
+
+      <p style="font-size:12px; color:rgba(234,253,251,0.55); margin:16px 0 0; position:relative; z-index:1;" data-i18n="referral_disclaimer">* تُحتسب المكافأة الفعلية وتُضاف لرصيدك بعد أول عملية سحب يقوم بها صديقك.</p>
 
       <div class="referral-actions">
         <div class="referral-link-box">
@@ -556,11 +558,36 @@ async function handleRoute() {
 
   if (data.needs_password) {
     document.getElementById("passwordBox").classList.remove("hidden");
+    let failedAttempts = 0;
+    const unlockBtn = document.getElementById("unlockBtn");
     document.getElementById("unlockBtn").addEventListener("click", async () => {
+      if (unlockBtn.disabled) return;
       const pass = document.getElementById("linkPasswordInput").value;
       const { data: unlocked, error: uErr } = await sb.rpc("unlock_link", { p_link_id: data.id, p_password: pass, p_visitor_id: getVisitorId() });
       if (uErr || !unlocked || !unlocked.ok) {
-        document.getElementById("passwordErr").textContent = t("wrong_password");
+        failedAttempts++;
+        // NOTE: client-side lockout only slows casual retries in this browser tab;
+        // real brute-force protection must be enforced server-side in the unlock_link RPC.
+        if (failedAttempts >= 5) {
+          unlockBtn.disabled = true;
+          document.getElementById("passwordErr").textContent = t("wrong_password");
+          let cooldown = 30;
+          const originalLabel = unlockBtn.textContent;
+          const tick = () => {
+            unlockBtn.textContent = `${t("wrong_password")} (${cooldown}s)`;
+            if (cooldown <= 0) {
+              clearInterval(cooldownTimer);
+              unlockBtn.textContent = originalLabel;
+              unlockBtn.disabled = false;
+              failedAttempts = 0;
+            }
+            cooldown--;
+          };
+          tick();
+          const cooldownTimer = setInterval(tick, 1000);
+        } else {
+          document.getElementById("passwordErr").textContent = t("wrong_password");
+        }
         return;
       }
       document.getElementById("passwordBox").classList.add("hidden");
@@ -619,16 +646,18 @@ async function initReferralSection(profile) {
 
   // Load referral stats
   try {
-    const { data: referrals } = await sb
-      .from("profiles")
-      .select("id")
-      .eq("referrer_id", profile.id);
-    
+    const [{ data: referrals }, { data: settings }] = await Promise.all([
+      sb.from("profiles").select("id").eq("referrer_id", profile.id),
+      sb.from("settings").select("referral_bonus_referrer").eq("id", 1).single()
+    ]);
+
     const referralCount = referrals ? referrals.length : 0;
-    const referralBonus = referralCount * 3; // $3 per referral
-    
+    const bonusRate = (settings && settings.referral_bonus_referrer) || 0;
+    const referralBonus = referralCount * bonusRate; // estimated — actual credit happens per-referral on their first withdrawal
+
     document.getElementById("referralCount").textContent = referralCount;
-    document.getElementById("referralEarnings").textContent = `$${referralBonus}`;
+    document.getElementById("referralEarnings").textContent = `$${referralBonus.toFixed(2).replace(/\.00$/, "")}`;
+    document.getElementById("referralBonusRate").textContent = bonusRate ? `$${bonusRate}` : "—";
   } catch (err) {
     console.error("Error loading referral stats:", err);
   }
