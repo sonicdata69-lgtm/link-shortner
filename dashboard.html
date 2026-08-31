@@ -5,254 +5,805 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ZLINK - Dashboard</title>
+    <title>ZLINK | لوحة التحكم</title>
 
     <link rel="stylesheet" href="style.css">
 
-    <style>
-        body {
-            margin: 0;
-            min-height: 100vh;
-        }
-
-        .dashboard {
-            max-width: 1100px;
-            margin: auto;
-            padding: 30px 20px 60px;
-        }
-
-        .dash-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 35px;
-        }
-
-        .dash-logo {
-            font-size: 32px;
-            font-weight: 800;
-        }
-
-        .dash-logo span {
-            color: #6c63ff;
-        }
-
-        .logout {
-            border: 1px solid #343b58;
-            background: rgba(255,255,255,.04);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        .welcome h1 {
-            font-size: 34px;
-            margin-bottom: 8px;
-        }
-
-        .welcome p {
-            color: #858da5;
-            margin-bottom: 30px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 30px;
-        }
-
-        .stat {
-            padding: 24px;
-            border-radius: 18px;
-            background: rgba(255,255,255,.035);
-            border: 1px solid rgba(255,255,255,.07);
-        }
-
-        .stat-title {
-            color: #858da5;
-            font-size: 14px;
-        }
-
-        .stat-number {
-            font-size: 30px;
-            font-weight: 800;
-            margin-top: 8px;
-        }
-
-        .panel {
-            background: rgba(255,255,255,.035);
-            border: 1px solid rgba(255,255,255,.07);
-            border-radius: 20px;
-            padding: 25px;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .panel-header h2 {
-            margin: 0;
-        }
-
-        .create-btn {
-            border: 0;
-            background: linear-gradient(135deg,#6c63ff,#8279ff);
-            color: white;
-            padding: 11px 20px;
-            border-radius: 10px;
-            font-family: inherit;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .empty {
-            text-align: center;
-            padding: 55px 20px;
-            color: #737b95;
-        }
-
-        .empty-icon {
-            font-size: 45px;
-            margin-bottom: 12px;
-        }
-
-        @media (max-width: 700px) {
-
-            .dashboard {
-                padding: 22px 15px 40px;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .dash-header {
-                margin-bottom: 25px;
-            }
-
-            .welcome h1 {
-                font-size: 27px;
-            }
-
-            .panel {
-                padding: 18px;
-            }
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="shared.js"></script>
 </head>
 
-<body>
+<body class="dashboard-page">
 
-    <div class="dashboard">
+<div class="dash-shell">
 
-        <header class="dash-header">
+    <!-- Sidebar -->
+    <aside class="sidebar">
 
-            <div class="dash-logo">
-                <span>Z</span>LINK
+        <div class="brand">
+            <span>Z</span>LINK
+        </div>
+
+        <button class="new-link-btn" id="newLinkBtn">
+            <span>＋</span>
+            اختصار رابط جديد
+        </button>
+
+        <nav class="side-nav">
+
+            <a class="active" href="dashboard.html">
+                <span>▦</span>
+                لوحة التحكم
+            </a>
+
+            <a href="#links">
+                <span>🔗</span>
+                روابطي
+            </a>
+
+            <a href="#stats">
+                <span>▥</span>
+                الإحصائيات
+            </a>
+
+            <a href="#">
+                <span>▢</span>
+                المجلدات
+            </a>
+
+            <a href="#">
+                <span>▤</span>
+                الفواتير
+                <small>جديد</small>
+            </a>
+
+            <a href="#">
+                <span>◉</span>
+                API
+            </a>
+
+            <a href="#">
+                <span>⚙</span>
+                الإعدادات
+            </a>
+
+        </nav>
+
+        <div class="upgrade-card">
+
+            <div class="upgrade-icon">♛</div>
+
+            <h3>الترقية إلى Pro</h3>
+
+            <p>
+                احصل على ميزات إضافية
+                وإحصائيات متقدمة.
+            </p>
+
+            <button>الترقية الآن</button>
+
+        </div>
+
+        <div class="sidebar-user">
+
+            <div class="avatar" id="sideAvatar">
+                M
             </div>
 
-            <button class="logout">
-                تسجيل الخروج
+            <div>
+                <strong id="sideName">
+                    حسابي
+                </strong>
+
+                <span>
+                    الحساب الشخصي
+                </span>
+            </div>
+
+        </div>
+
+        <button class="logout-btn" id="navLogout">
+            ⇥ تسجيل الخروج
+        </button>
+
+    </aside>
+
+
+    <!-- Main -->
+    <main class="dash-main">
+
+        <header class="topbar">
+
+            <button class="menu-btn" id="menuBtn">
+                ☰
             </button>
+
+            <div class="search-box">
+                🔎
+                <input
+                    id="searchInput"
+                    type="search"
+                    placeholder="ابحث عن رابط..."
+                >
+            </div>
+
+            <div class="top-actions">
+
+                <button class="icon-btn">
+                    🔔
+                    <i>3</i>
+                </button>
+
+                <button class="theme-btn">
+                    ◐
+                </button>
+
+                <div class="profile-mini">
+
+                    <div class="avatar" id="topAvatar">
+                        M
+                    </div>
+
+                    <div>
+                        <strong id="topName">
+                            medoo dragona
+                        </strong>
+
+                        <span>
+                            الحساب الشخصي
+                        </span>
+                    </div>
+
+                    <span>⌄</span>
+
+                </div>
+
+            </div>
 
         </header>
 
 
-        <section class="welcome">
+        <section class="content">
 
-            <h1>لوحة التحكم 👋</h1>
+            <!-- Welcome -->
 
-            <p>
-                تابع روابطك المختصرة وإحصائياتها من مكان واحد.
-            </p>
+            <div class="welcome-row">
 
-        </section>
+                <div>
 
+                    <h1>
+                        مرحبًا بك،
+                        <span id="welcomeName">medoo</span> 👋
+                    </h1>
 
-        <section class="stats">
+                    <p>
+                        إدارة روابطك المختصرة ومتابعة أدائها بسهولة.
+                    </p>
 
-            <div class="stat">
-
-                <div class="stat-title">
-                    إجمالي الروابط
                 </div>
 
-                <div class="stat-number">
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="stat-title">
-                    إجمالي الزيارات
-                </div>
-
-                <div class="stat-number">
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="stat-title">
-                    روابط اليوم
-                </div>
-
-                <div class="stat-number">
-                    0
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <section class="panel">
-
-            <div class="panel-header">
-
-                <h2>
-                    روابطك
-                </h2>
-
-                <button class="create-btn">
-                    + اختصار رابط
+                <button class="date-filter">
+                    آخر 7 أيام　▣
                 </button>
 
             </div>
 
 
-            <div class="empty">
+            <!-- Stats -->
 
-                <div class="empty-icon">
-                    🔗
+            <section class="stats-grid">
+
+                <div class="stat-card purple">
+
+                    <div class="stat-icon">🔗</div>
+
+                    <div>
+                        <span>إجمالي الروابط</span>
+                        <strong id="totalLinks">0</strong>
+                        <small>↗ 15% عن الأسبوع الماضي</small>
+                    </div>
+
                 </div>
 
-                <h3>
-                    لا توجد روابط حتى الآن
-                </h3>
 
-                <p>
-                    ابدأ بإنشاء أول رابط مختصر لك.
-                </p>
+                <div class="stat-card green">
 
-            </div>
+                    <div class="stat-icon">⌁</div>
+
+                    <div>
+                        <span>إجمالي الزيارات</span>
+                        <strong id="totalClicks">0</strong>
+                        <small>↗ 28% عن الأسبوع الماضي</small>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card blue">
+
+                    <div class="stat-icon">◉</div>
+
+                    <div>
+                        <span>زيارات اليوم</span>
+                        <strong id="todayClicks">0</strong>
+                        <small>↗ 12% عن أمس</small>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card orange">
+
+                    <div class="stat-icon">⌁</div>
+
+                    <div>
+                        <span>متوسط النقرات</span>
+                        <strong id="averageClicks">0</strong>
+                        <small>نقرة لكل رابط</small>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card pink">
+
+                    <div class="stat-icon">♧</div>
+
+                    <div>
+                        <span>الزوار</span>
+                        <strong id="visitors">0</strong>
+                        <small>↗ 18% عن الأسبوع الماضي</small>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Charts -->
+
+            <section class="analytics-grid" id="stats">
+
+                <div class="panel chart-panel">
+
+                    <div class="panel-head">
+
+                        <div>
+                            <h2>الزيارات خلال آخر 7 أيام</h2>
+                            <span>أداء روابطك خلال الأسبوع</span>
+                        </div>
+
+                        <button>آخر 7 أيام⌄</button>
+
+                    </div>
+
+                    <div class="fake-chart">
+
+                        <div class="chart-line"></div>
+
+                        <div class="chart-labels">
+                            <span>السبت</span>
+                            <span>الأحد</span>
+                            <span>الإثنين</span>
+                            <span>الثلاثاء</span>
+                            <span>الأربعاء</span>
+                            <span>الخميس</span>
+                            <span>الجمعة</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel sources-panel">
+
+                    <div class="panel-head">
+
+                        <div>
+                            <h2>أفضل المصادر</h2>
+                            <span>مصادر زيارات روابطك</span>
+                        </div>
+
+                    </div>
+
+                    <div class="donut-wrap">
+
+                        <div class="donut">
+                            <div>
+                                <strong>100%</strong>
+                                <span>الزيارات</span>
+                            </div>
+                        </div>
+
+                        <div class="source-list">
+
+                            <div>
+                                <i class="purple-dot"></i>
+                                مباشر
+                                <strong>45%</strong>
+                            </div>
+
+                            <div>
+                                <i class="green-dot"></i>
+                                Google
+                                <strong>30%</strong>
+                            </div>
+
+                            <div>
+                                <i class="blue-dot"></i>
+                                Twitter
+                                <strong>15%</strong>
+                            </div>
+
+                            <div>
+                                <i class="orange-dot"></i>
+                                Facebook
+                                <strong>10%</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel countries-panel">
+
+                    <div class="panel-head">
+
+                        <div>
+                            <h2>الزيارات حسب الدولة</h2>
+                            <span>توزيع الزوار</span>
+                        </div>
+
+                    </div>
+
+                    <div class="country-list">
+
+                        <div>
+                            <span>🇪🇬 مصر</span>
+                            <strong>45%</strong>
+                        </div>
+
+                        <div>
+                            <span>🇸🇦 السعودية</span>
+                            <strong>20%</strong>
+                        </div>
+
+                        <div>
+                            <span>🇲🇦 المغرب</span>
+                            <strong>10%</strong>
+                        </div>
+
+                        <div>
+                            <span>🇺🇸 أمريكا</span>
+                            <strong>8%</strong>
+                        </div>
+
+                        <div>
+                            <span>🌍 أخرى</span>
+                            <strong>17%</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Links -->
+
+            <section class="panel links-panel" id="links">
+
+                <div class="links-head">
+
+                    <div>
+                        <h2>
+                            روابطي
+                            <b id="linkCountBadge">0 رابط</b>
+                        </h2>
+
+                        <span>
+                            إدارة جميع روابطك المختصرة
+                        </span>
+                    </div>
+
+                    <div class="links-actions">
+
+                        <button class="secondary-btn">
+                            ↓ تصدير
+                        </button>
+
+                        <button class="new-link-small" id="newLinkBtn2">
+                            ＋ اختصار رابط جديد
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-tools">
+
+                    <div class="search-table">
+
+                        🔎
+
+                        <input
+                            id="tableSearch"
+                            placeholder="ابحث عن رابط..."
+                        >
+
+                    </div>
+
+                    <button>
+                        ⚱ تصفية
+                    </button>
+
+                    <button>
+                        ▣ المجلدات⌄
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>الرابط المختصر</th>
+
+                                <th>الرابط الأصلي</th>
+
+                                <th>الزيارات</th>
+
+                                <th>تاريخ الإنشاء</th>
+
+                                <th>المصدر</th>
+
+                                <th>إجراءات</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="linksTable">
+
+                            <tr>
+
+                                <td colspan="6">
+
+                                    <div class="empty-state">
+
+                                        <div>🔗</div>
+
+                                        <h3>لا توجد روابط حتى الآن</h3>
+
+                                        <p>
+                                            ابدأ بإنشاء أول رابط مختصر لك.
+                                        </p>
+
+                                        <button id="emptyCreateBtn">
+                                            ＋ اختصار رابط
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- Bottom widgets -->
+
+            <section class="bottom-grid">
+
+                <div class="panel">
+
+                    <div class="panel-head">
+                        <h2>أفضل الروابط</h2>
+                        <span>حسب عدد الزيارات</span>
+                    </div>
+
+                    <div class="mini-list" id="topLinks">
+
+                        <div class="mini-empty">
+                            لا توجد بيانات بعد
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-head">
+                        <h2>أفضل الأجهزة</h2>
+                        <span>نوع الجهاز</span>
+                    </div>
+
+                    <div class="device-bars">
+
+                        <div>
+                            <span>📱 موبايل</span>
+                            <strong>62%</strong>
+                        </div>
+
+                        <div class="bar">
+                            <i style="width:62%"></i>
+                        </div>
+
+
+                        <div>
+                            <span>💻 كمبيوتر</span>
+                            <strong>30%</strong>
+                        </div>
+
+                        <div class="bar">
+                            <i style="width:30%"></i>
+                        </div>
+
+
+                        <div>
+                            <span>📟 تابلت</span>
+                            <strong>8%</strong>
+                        </div>
+
+                        <div class="bar">
+                            <i style="width:8%"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel tip-panel">
+
+                    <div class="tip-icon">
+                        💡
+                    </div>
+
+                    <h2>
+                        نصيحة اليوم
+                    </h2>
+
+                    <p>
+                        استخدم الروابط القصيرة في حملاتك
+                        التسويقية لزيادة التفاعل وقياس الأداء
+                        بشكل أفضل.
+                    </p>
+
+                    <button>
+                        مزيد من النصائح
+                    </button>
+
+                </div>
+
+            </section>
 
         </section>
 
+    </main>
+
+</div>
+
+
+<!-- Modal -->
+
+<div class="modal hidden" id="linkModal">
+
+    <div class="modal-box">
+
+        <button class="modal-close" id="modalClose">
+            ×
+        </button>
+
+        <div class="modal-icon">
+            🔗
+        </div>
+
+        <h2>اختصار رابط جديد</h2>
+
+        <p>
+            الصق الرابط الطويل لإنشاء رابط مختصر.
+        </p>
+
+        <input
+            id="longUrl"
+            type="url"
+            placeholder="https://example.com/very-long-link"
+        >
+
+        <input
+            id="customAlias"
+            type="text"
+            placeholder="اسم مخصص للرابط (اختياري)"
+        >
+
+        <button class="modal-submit" id="createLinkBtn">
+            اختصر الرابط الآن
+        </button>
+
+        <div id="modalMessage"></div>
+
     </div>
 
-</body>
+</div>
 
+
+<script>
+
+const modal = document.getElementById("linkModal");
+
+function openModal() {
+    modal.classList.remove("hidden");
+    document.getElementById("longUrl").focus();
+}
+
+function closeModal() {
+    modal.classList.add("hidden");
+}
+
+document
+    .getElementById("newLinkBtn")
+    .addEventListener("click", openModal);
+
+document
+    .getElementById("newLinkBtn2")
+    .addEventListener("click", openModal);
+
+document
+    .getElementById("emptyCreateBtn")
+    .addEventListener("click", openModal);
+
+document
+    .getElementById("modalClose")
+    .addEventListener("click", closeModal);
+
+modal.addEventListener("click", function(e) {
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+
+async function loadProfile() {
+
+    try {
+
+        const profile = await getCurrentProfile();
+
+        if (!profile) {
+            location.href = "auth.html";
+            return;
+        }
+
+        const name =
+            profile.name ||
+            profile.full_name ||
+            profile.email?.split("@")[0] ||
+            "medoo";
+
+        document.getElementById("welcomeName").textContent = name;
+        document.getElementById("topName").textContent = name;
+        document.getElementById("sideName").textContent = name;
+
+        const initial =
+            name.trim().charAt(0).toUpperCase();
+
+        document.getElementById("topAvatar").textContent = initial;
+        document.getElementById("sideAvatar").textContent = initial;
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+async function loadLinks() {
+
+    /*
+      ملاحظة:
+      واجهة الـDashboard جاهزة بالكامل.
+      ربط جدول الروابط يتم مع جدول Supabase
+      الموجود في مشروعك بدل اختراع اسم جدول
+      غير موجود.
+    */
+
+    try {
+
+        const profile = await getCurrentProfile();
+
+        if (!profile) return;
+
+        /*
+          هنا سنربط الـ links بالـ schema الحقيقي
+          في الخطوة التالية.
+        */
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+document
+    .getElementById("createLinkBtn")
+    .addEventListener("click", async function() {
+
+        const url =
+            document.getElementById("longUrl").value.trim();
+
+        const alias =
+            document.getElementById("customAlias").value.trim();
+
+        const message =
+            document.getElementById("modalMessage");
+
+        if (!url) {
+
+            message.textContent =
+                "من فضلك أدخل الرابط.";
+
+            return;
+        }
+
+        try {
+
+            new URL(url);
+
+        } catch {
+
+            message.textContent =
+                "الرابط غير صحيح.";
+
+            return;
+        }
+
+        message.textContent =
+            "واجهة الاختصار جاهزة، وسنربطها بدالة الاختصار الحالية بدون تغيير نظامك.";
+
+    });
+
+
+document
+    .getElementById("menuBtn")
+    .addEventListener("click", function() {
+
+        document
+            .querySelector(".sidebar")
+            .classList.toggle("mobile-open");
+
+    });
+
+
+loadProfile();
+loadLinks();
+
+</script>
+
+</body>
 </html>
