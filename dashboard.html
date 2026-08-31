@@ -1,14 +1,258 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>zlink</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZLINK - Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px 20px 60px;
+        }
+
+        .dash-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 35px;
+        }
+
+        .dash-logo {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .dash-logo span {
+            color: #6c63ff;
+        }
+
+        .logout {
+            border: 1px solid #343b58;
+            background: rgba(255,255,255,.04);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .welcome h1 {
+            font-size: 34px;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #858da5;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat {
+            padding: 24px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.07);
+        }
+
+        .stat-title {
+            color: #858da5;
+            font-size: 14px;
+        }
+
+        .stat-number {
+            font-size: 30px;
+            font-weight: 800;
+            margin-top: 8px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+        }
+
+        .create-btn {
+            border: 0;
+            background: linear-gradient(135deg,#6c63ff,#8279ff);
+            color: white;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 55px 20px;
+            color: #737b95;
+        }
+
+        .empty-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 700px) {
+
+            .dashboard {
+                padding: 22px 15px 40px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .dash-header {
+                margin-bottom: 25px;
+            }
+
+            .welcome h1 {
+                font-size: 27px;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>zlink</h1>
+    <div class="dashboard">
+
+        <header class="dash-header">
+
+            <div class="dash-logo">
+                <span>Z</span>LINK
+            </div>
+
+            <button class="logout">
+                تسجيل الخروج
+            </button>
+
+        </header>
+
+
+        <section class="welcome">
+
+            <h1>لوحة التحكم 👋</h1>
+
+            <p>
+                تابع روابطك المختصرة وإحصائياتها من مكان واحد.
+            </p>
+
+        </section>
+
+
+        <section class="stats">
+
+            <div class="stat">
+
+                <div class="stat-title">
+                    إجمالي الروابط
+                </div>
+
+                <div class="stat-number">
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-title">
+                    إجمالي الزيارات
+                </div>
+
+                <div class="stat-number">
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-title">
+                    روابط اليوم
+                </div>
+
+                <div class="stat-number">
+                    0
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <h2>
+                    روابطك
+                </h2>
+
+                <button class="create-btn">
+                    + اختصار رابط
+                </button>
+
+            </div>
+
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    🔗
+                </div>
+
+                <h3>
+                    لا توجد روابط حتى الآن
+                </h3>
+
+                <p>
+                    ابدأ بإنشاء أول رابط مختصر لك.
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
 
 </body>
+
 </html>
