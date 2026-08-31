@@ -299,18 +299,9 @@
   <div id="redirectText" data-i18n="redirect_text">جارٍ تحويلك إلى الرابط...</div>
   <button class="btn btn-ghost hidden" id="skipBtn" style="min-width:160px;"></button>
 
-  <div class="card hidden" id="aboutUsCard" style="max-width:380px; text-align:start;">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--cyan);"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"></path><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"></path></svg>
-      <strong style="font-family:'Space Grotesk',sans-serif; font-size:17px;" data-i18n="about_us_title">عن zlink</strong>
-    </div>
-    <p style="margin:0 0 12px; font-size:13px; color:rgba(234,253,251,0.7);" data-i18n="about_us_desc">
-      zlink منصة لاختصار الروابط، تتيح لك تحويل أي رابط طويل إلى رابط قصير سهل المشاركة، وتحقيق أرباح حقيقية من كل نقرة عليه.
-    </p>
-    <a href="https://wa.me/201220349490" target="_blank" rel="noopener" class="btn btn-ghost btn-small" style="width:fit-content; display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-      <span data-i18n="contact_whatsapp">تواصل معنا عبر واتساب</span>
-    </a>
+  <!-- شاشة تحميل بسيطة تظهر بس لو مفيش إعلان حقيقي متظبط بعد -->
+  <div class="hidden" id="plainLoading" style="display:flex; flex-direction:column; align-items:center; gap:10px; opacity:0.6;">
+    <div class="spinner" aria-hidden="true"></div>
   </div>
 
   <div id="passwordBox" class="card hidden" style="max-width:380px; text-align:start;">
@@ -517,15 +508,14 @@ async function proceedWithAd(target) {
   const adSeconds = (settings && settings.ad_seconds) || 0;
   const adHtml = (settings && settings.ad_html) || "";
 
-  // Only show the "about zlink" fallback card when there's no real ad slot
-  // configured yet, so a visitor is never left staring at a promo card
-  // instead of the actual skip flow.
-  const aboutCard = document.getElementById("aboutUsCard");
+  // لو مفيش إعلان حقيقي متظبط بعد، نعرض شاشة تحميل بسيطة وصادقة
+  // بدل أي كارت ترويجي — الزائر بيستنى ثانية ويتحول، من غير أي محتوى مضلل.
+  const plainLoading = document.getElementById("plainLoading");
   if (adHtml) {
     document.getElementById("adSlot").innerHTML = adHtml;
-    aboutCard.classList.add("hidden");
+    plainLoading.classList.add("hidden");
   } else {
-    aboutCard.classList.remove("hidden");
+    plainLoading.classList.remove("hidden");
   }
 
   if (adSeconds > 0) {
@@ -546,11 +536,9 @@ async function proceedWithAd(target) {
     const timer = setInterval(tick, 1000);
     skipBtn.addEventListener("click", () => {
       if (skipBtn.disabled) return;
-      aboutCard.classList.add("hidden");
       location.replace(target);
     });
   } else {
-    aboutCard.classList.add("hidden");
     location.replace(target);
   }
 }
