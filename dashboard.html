@@ -36,6 +36,7 @@
     <span>zlink</span>
   </a>
   <div class="nav-links">
+    <span id="navBalance" class="hidden" style="font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--cyan); padding:0 4px;"></span>
     <a href="dashboard.html" id="navDashboard" class="hidden">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
       <span data-i18n="nav_dashboard">لوحتي</span>
@@ -62,127 +63,243 @@
 <div class="page">
   <h1 style="font-family:'Space Grotesk',sans-serif;" data-i18n="dash_title">لوحة التحكم</h1>
 
-  <div class="stat-row" style="margin-bottom:20px;">
-    <div class="stat-box">
-      <div class="num" id="balanceNum">0</div>
-      <div class="lbl" data-i18n="balance_label">رصيدك الحالي</div>
-    </div>
-  </div>
+  <div class="dash-layout">
+    <aside class="dash-sidebar">
+      <button class="dash-tab active" data-tab="stats" data-i18n="tab_stats">📊 الإحصائيات</button>
+      <button class="dash-tab" data-tab="visits" data-i18n="tab_visits">🧾 تفاصيل الزيارات</button>
+      <button class="dash-tab" data-tab="links" data-i18n="tab_links">🔗 إدارة الروابط</button>
+      <button class="dash-tab" data-tab="withdraw" data-i18n="tab_withdraw">💵 السحب</button>
+      <button class="dash-tab" data-tab="referrals" data-i18n="tab_referrals">🤝 الإحالات</button>
+      <button class="dash-tab" data-tab="traffic" data-i18n="tab_traffic">📡 مصادر الزيارات</button>
+      <button class="dash-tab" data-tab="tools" data-i18n="tab_tools">🛠 أدوات</button>
+      <button class="dash-tab" data-tab="settings" data-i18n="tab_settings">⚙️ الإعدادات</button>
+      <button class="dash-tab" data-tab="support" data-i18n="tab_support">💬 الدعم</button>
+    </aside>
 
-  <div class="card" style="max-width:560px;">
-    <h2>
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-      <span data-i18n="referral_title" style="vertical-align:middle;">ادعُ صحابك واربح</span>
-    </h2>
-    <p style="margin:0 0 6px; font-size:13px; color:rgba(234,253,251,0.6);" data-i18n="referral_desc">شارك رابط الدعوة بتاعك، وبعد ما صاحبك يعمل أول عملية سحب لأرباحه، هتاخد مكافأة تتضاف لرصيدك تلقائيًا.</p>
-    <label data-i18n="referral_link_label">رابط الدعوة بتاعك</label>
-    <div class="result-url" id="referralLink" style="cursor:pointer;"></div>
-    <div class="stat-row" style="margin-top:12px;">
-      <div class="stat-box">
-        <div class="num" id="referredCount">0</div>
-        <div class="lbl" data-i18n="referred_count_label">عدد اللي دخلوا بدعوتك</div>
+    <section class="dash-content">
+
+      <!-- ===== الإحصائيات ===== -->
+      <div class="dash-panel" data-panel="stats">
+        <div class="card">
+          <h2 data-i18n="stats_overview_title">نظرة عامة</h2>
+          <div class="stat-row">
+            <div class="stat-box">
+              <div class="num" id="ovTotalViews">0</div>
+              <div class="lbl" data-i18n="ov_total_views">إجمالي المشاهدات</div>
+            </div>
+            <div class="stat-box">
+              <div class="num" id="ovTotalEarnings">$0.000</div>
+              <div class="lbl" data-i18n="ov_total_earnings">إجمالي الأرباح</div>
+            </div>
+            <div class="stat-box">
+              <div class="num" id="ovReferralEarnings">$0.000</div>
+              <div class="lbl" data-i18n="ov_referral_earnings">أرباح الإحالة</div>
+            </div>
+            <div class="stat-box">
+              <div class="num" id="ovAvgCpm">0</div>
+              <div class="lbl" data-i18n="ov_avg_cpm">متوسط CPM</div>
+            </div>
+          </div>
+          <p id="ovEarningsNote" class="hidden" style="font-size:12px; color:rgba(234,253,251,0.55); margin-top:10px;" data-i18n="ov_earnings_note">
+            الأرباح والـ CPM لسه صفر لحد ما يتم ربط الموقع بشبكة إعلانات فعلية. عدد المشاهدات أعلاه حقيقي ومأخوذ من كليكات روابطك.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2 data-i18n="stats_chart_title">المشاهدات خلال آخر 14 يوم</h2>
+          <canvas id="overviewChart" height="180"></canvas>
+          <div id="noOverviewStats" class="success-badge hidden" data-i18n="no_stats">لسه مفيش كليكات على روابطك</div>
+        </div>
       </div>
-      <div class="stat-box">
-        <div class="num" id="referralEarned">0</div>
-        <div class="lbl" data-i18n="referral_earned_label">اللي كسبته من الإحالة</div>
+
+      <!-- ===== تفاصيل الزيارات ===== -->
+      <div class="dash-panel hidden" data-panel="visits">
+        <div class="card">
+          <h2 data-i18n="visits_title">تفاصيل الزيارات اليومية</h2>
+          <p style="font-size:13px; color:rgba(234,253,251,0.6);" data-i18n="visits_desc">إجمالي المشاهدات مجمّعة يوميًا عبر كل روابطك (بيانات حقيقية).</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="visits_col_date">التاريخ</th>
+                  <th data-i18n="visits_col_views">المشاهدات</th>
+                </tr>
+              </thead>
+              <tbody id="visitsBody"></tbody>
+            </table>
+            <div id="noVisits" class="success-badge hidden" data-i18n="no_stats">لسه مفيش كليكات على روابطك</div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div class="card" style="max-width:560px;">
-    <h2>
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-      <span data-i18n="add_link_title" style="vertical-align:middle;">أضف رابط جديد</span>
-    </h2>
-    <label for="longUrl" data-i18n="url_label">الرابط الطويل</label>
-    <input type="text" id="longUrl" class="url-input" data-i18n-placeholder="url_placeholder" placeholder="https://example.com/very/long/link" />
+      <!-- ===== إدارة الروابط ===== -->
+      <div class="dash-panel hidden" data-panel="links">
+        <div class="card" style="max-width:560px;">
+          <h2>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span data-i18n="add_link_title" style="vertical-align:middle;">أضف رابط جديد</span>
+          </h2>
+          <label for="longUrl" data-i18n="url_label">الرابط الطويل</label>
+          <input type="text" id="longUrl" class="url-input" data-i18n-placeholder="url_placeholder" placeholder="https://example.com/very/long/link" />
 
-    <button type="button" class="btn-ghost btn-small" id="advToggle" style="align-self:flex-start;" data-i18n="advanced_options">خيارات متقدمة (اختياري)</button>
+          <button type="button" class="btn-ghost btn-small" id="advToggle" style="align-self:flex-start;" data-i18n="advanced_options">خيارات متقدمة (اختياري)</button>
 
-    <div id="advBox" class="hidden" style="display:flex; flex-direction:column; gap:14px;">
-      <div>
-        <label for="customAlias" data-i18n="custom_alias_label">اسم مخصص للرابط (اختياري)</label>
-        <input type="text" id="customAlias" class="url-input" data-i18n-placeholder="custom_alias_placeholder" placeholder="my-link" />
+          <div id="advBox" class="hidden" style="display:flex; flex-direction:column; gap:14px;">
+            <div>
+              <label for="customAlias" data-i18n="custom_alias_label">اسم مخصص للرابط (اختياري)</label>
+              <input type="text" id="customAlias" class="url-input" data-i18n-placeholder="custom_alias_placeholder" placeholder="my-link" />
+            </div>
+            <div>
+              <label for="linkPassword" data-i18n="password_protect_label">حماية بباسورد (اختياري)</label>
+              <input type="password" id="linkPassword" class="url-input" data-i18n-placeholder="password_protect_placeholder" />
+            </div>
+            <div>
+              <label for="expirySelect" data-i18n="expiry_label">تاريخ الانتهاء</label>
+              <select id="expirySelect">
+                <option value="" data-i18n="expiry_none">بدون</option>
+                <option value="1" data-i18n="expiry_1d">يوم واحد</option>
+                <option value="7" data-i18n="expiry_7d">7 أيام</option>
+                <option value="30" data-i18n="expiry_30d">30 يوم</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="error-msg" id="shortenErr"></div>
+          <div class="result-url hidden" id="shortenResult"></div>
+          <button class="btn" id="shortenBtn">
+            <span class="shine"></span>
+            <span data-i18n="shorten_btn">اختصر الرابط</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 data-i18n="my_links">روابطي</h2>
+          <p style="font-size:12px; color:rgba(234,253,251,0.5);" data-i18n="per_country_note">ملحوظة: عائد الكليك بيختلف حسب بلد الزائر — الميزة دي هتتفعّل بعد ربط شبكة إعلانات حقيقية.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+            <input type="text" id="linkSearch" class="url-input" style="margin:0; flex:1; min-width:180px;" data-i18n-placeholder="search_links_placeholder" placeholder="دور في روابطك" />
+            <button class="btn-ghost btn-small" id="sortClicksBtn" data-i18n="sort_by_clicks" style="white-space:nowrap;">الأكثر كليكات</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="link_col_short">الرابط المختصر</th>
+                  <th data-i18n="link_col_dest">الوجهة</th>
+                  <th data-i18n="link_col_clicks">الكليكات</th>
+                  <th data-i18n="link_col_actions">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="linksBody"></tbody>
+            </table>
+            <div id="noLinks" class="success-badge hidden" data-i18n="no_links">لسه معملتش أي رابط</div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="linkPassword" data-i18n="password_protect_label">حماية بباسورد (اختياري)</label>
-        <input type="password" id="linkPassword" class="url-input" data-i18n-placeholder="password_protect_placeholder" />
+
+      <!-- ===== السحب ===== -->
+      <div class="dash-panel hidden" data-panel="withdraw">
+        <div class="card" style="max-width:480px;">
+          <h2>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M2 10h20"></path></svg>
+            <span data-i18n="withdraw_title" style="vertical-align:middle;">طلب سحب أرباح</span>
+          </h2>
+          <label for="amount" data-i18n="amount_label">المبلغ</label>
+          <input type="number" id="amount" class="url-input" placeholder="0" />
+          <label for="method" data-i18n="method_label">طريقة السحب</label>
+          <select id="method"></select>
+          <label for="details" data-i18n="details_label">بيانات الحساب (رقم / يوزر / عنوان محفظة)</label>
+          <input type="text" id="details" class="url-input" placeholder="" />
+          <p style="font-size:12px; color:rgba(234,253,251,0.6); margin:6px 0 0;" data-i18n="withdraw_turnaround_note">⚡ استلام الأرباح يوميًا بحد أقصى 24 ساعة من وقت الطلب.</p>
+          <div class="error-msg" id="wErrorMsg"></div>
+          <div class="success-msg" id="wSuccessMsg"></div>
+          <button class="btn" id="withdrawBtn">
+            <span class="shine"></span>
+            <span data-i18n="withdraw_btn">اطلب السحب</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <h2 data-i18n="withdraw_history">طلباتي السابقة</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="wd_col_amount">المبلغ</th>
+                  <th data-i18n="wd_col_method">الطريقة</th>
+                  <th data-i18n="wd_col_status">الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="withdrawalsBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div>
-        <label for="expirySelect" data-i18n="expiry_label">تاريخ الانتهاء</label>
-        <select id="expirySelect">
-          <option value="" data-i18n="expiry_none">بدون</option>
-          <option value="1" data-i18n="expiry_1d">يوم واحد</option>
-          <option value="7" data-i18n="expiry_7d">7 أيام</option>
-          <option value="30" data-i18n="expiry_30d">30 يوم</option>
-        </select>
+
+      <!-- ===== الإحالات ===== -->
+      <div class="dash-panel hidden" data-panel="referrals">
+        <div class="card" style="max-width:560px;">
+          <h2>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span data-i18n="referral_title" style="vertical-align:middle;">ادعُ صحابك واربح</span>
+          </h2>
+          <p style="margin:0 0 6px; font-size:13px; color:rgba(234,253,251,0.6);" data-i18n="referral_desc">شارك رابط الدعوة بتاعك، وبعد ما صاحبك يعمل أول عملية سحب لأرباحه، هتاخد مكافأة تتضاف لرصيدك تلقائيًا.</p>
+          <label data-i18n="referral_link_label">رابط الدعوة بتاعك</label>
+          <div class="result-url" id="referralLink" style="cursor:pointer;"></div>
+          <div class="stat-row" style="margin-top:12px;">
+            <div class="stat-box">
+              <div class="num" id="referredCount">0</div>
+              <div class="lbl" data-i18n="referred_count_label">عدد اللي دخلوا بدعوتك</div>
+            </div>
+            <div class="stat-box">
+              <div class="num" id="referralEarned">0</div>
+              <div class="lbl" data-i18n="referral_earned_label">اللي كسبته من الإحالة</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="error-msg" id="shortenErr"></div>
-    <div class="result-url hidden" id="shortenResult"></div>
-    <button class="btn" id="shortenBtn">
-      <span class="shine"></span>
-      <span data-i18n="shorten_btn">اختصر الرابط</span>
-    </button>
-  </div>
+      <!-- ===== مصادر الزيارات ===== -->
+      <div class="dash-panel hidden" data-panel="traffic">
+        <div class="card" style="align-items:center; text-align:center;">
+          <h2 data-i18n="traffic_title">مصادر الزيارات</h2>
+          <p style="font-size:13px; color:rgba(234,253,251,0.6); max-width:420px;" data-i18n="coming_soon_desc">الميزة دي لسه تحت التطوير — هتقدر تشوف منها الأماكن اللي بتيجي منها زياراتك (واتساب، فيسبوك، مباشر...) قريبًا.</p>
+        </div>
+      </div>
 
-  <div class="card">
-    <h2 data-i18n="my_links">روابطي</h2>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
-      <input type="text" id="linkSearch" class="url-input" style="margin:0; flex:1; min-width:180px;" data-i18n-placeholder="search_links_placeholder" placeholder="دور في روابطك" />
-      <button class="btn-ghost btn-small" id="sortClicksBtn" data-i18n="sort_by_clicks" style="white-space:nowrap;">الأكثر كليكات</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th data-i18n="link_col_short">الرابط المختصر</th>
-            <th data-i18n="link_col_dest">الوجهة</th>
-            <th data-i18n="link_col_clicks">الكليكات</th>
-            <th data-i18n="link_col_actions">إجراءات</th>
-          </tr>
-        </thead>
-        <tbody id="linksBody"></tbody>
-      </table>
-      <div id="noLinks" class="success-badge hidden" data-i18n="no_links">لسه معملتش أي رابط</div>
-    </div>
-  </div>
+      <!-- ===== أدوات ===== -->
+      <div class="dash-panel hidden" data-panel="tools">
+        <div class="card" style="align-items:center; text-align:center;">
+          <h2 data-i18n="tools_title">أدوات</h2>
+          <p style="font-size:13px; color:rgba(234,253,251,0.6); max-width:420px;" data-i18n="tools_coming_soon_desc">أدوات إضافية زي التقصير بالجملة (Bulk) وربط API بتاعك جاية قريبًا.</p>
+        </div>
+      </div>
 
-  <div class="card" style="max-width:480px;">
-    <h2>
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M2 10h20"></path></svg>
-      <span data-i18n="withdraw_title" style="vertical-align:middle;">طلب سحب أرباح</span>
-    </h2>
-    <label for="amount" data-i18n="amount_label">المبلغ</label>
-    <input type="number" id="amount" class="url-input" placeholder="0" />
-    <label for="method" data-i18n="method_label">طريقة السحب</label>
-    <select id="method"></select>
-    <label for="details" data-i18n="details_label">بيانات الحساب (رقم / يوزر / عنوان محفظة)</label>
-    <input type="text" id="details" class="url-input" placeholder="" />
-    <p style="font-size:12px; color:rgba(234,253,251,0.6); margin:6px 0 0;" data-i18n="withdraw_turnaround_note">⚡ استلام الأرباح يوميًا بحد أقصى 24 ساعة من وقت الطلب.</p>
-    <div class="error-msg" id="wErrorMsg"></div>
-    <div class="success-msg" id="wSuccessMsg"></div>
-    <button class="btn" id="withdrawBtn">
-      <span class="shine"></span>
-      <span data-i18n="withdraw_btn">اطلب السحب</span>
-    </button>
-  </div>
+      <!-- ===== الإعدادات ===== -->
+      <div class="dash-panel hidden" data-panel="settings">
+        <div class="card" style="max-width:420px;">
+          <h2 data-i18n="settings_title">إعدادات الحساب</h2>
+          <label data-i18n="settings_email_label">البريد الإلكتروني</label>
+          <input type="text" id="settingsEmail" class="url-input" disabled />
+          <label for="newPasswordSettings" data-i18n="settings_new_password_label">كلمة مرور جديدة</label>
+          <input type="password" id="newPasswordSettings" class="url-input" data-i18n-placeholder="settings_password_placeholder" placeholder="اتركها فاضية لو مش عايز تغيرها" />
+          <div class="error-msg" id="settingsErr"></div>
+          <div class="success-msg" id="settingsOk"></div>
+          <button class="btn" id="settingsSaveBtn" data-i18n="save_btn">حفظ</button>
+        </div>
+      </div>
 
-  <div class="card">
-    <h2 data-i18n="withdraw_history">طلباتي السابقة</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th data-i18n="wd_col_amount">المبلغ</th>
-            <th data-i18n="wd_col_method">الطريقة</th>
-            <th data-i18n="wd_col_status">الحالة</th>
-          </tr>
-        </thead>
-        <tbody id="withdrawalsBody"></tbody>
-      </table>
-    </div>
+      <!-- ===== الدعم ===== -->
+      <div class="dash-panel hidden" data-panel="support">
+        <div class="card" style="max-width:420px;">
+          <h2 data-i18n="support_title">الدعم الفني</h2>
+          <p style="font-size:13px; color:rgba(234,253,251,0.6);" data-i18n="support_desc">لو عندك أي استفسار أو مشكلة في حسابك أو أرباحك، تواصل معنا مباشرة.</p>
+          <a href="https://wa.me/201220349490" target="_blank" rel="noopener" class="btn btn-ghost" style="width:fit-content; display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
+            <span data-i18n="contact_whatsapp">تواصل معنا عبر واتساب</span>
+          </a>
+        </div>
+      </div>
+
+    </section>
   </div>
 </div>
 
@@ -233,6 +350,19 @@
 let currentProfile = null;
 let currentEditId = null;
 let statsChartInstance = null;
+let overviewChartInstance = null;
+
+// ===== تبديل التبويبات =====
+document.querySelectorAll(".dash-tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".dash-tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".dash-panel").forEach(p => {
+      p.classList.toggle("hidden", p.dataset.panel !== tab);
+    });
+  });
+});
 
 const COPY_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 const CHECK_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
@@ -421,7 +551,91 @@ document.getElementById("advToggle").addEventListener("click", () => {
   document.getElementById("advBox").classList.toggle("hidden");
 });
 
-async function loadWithdrawals(userId) {
+// ===== نظرة عامة حقيقية: بتجمع بيانات get_link_stats عبر كل روابط المستخدم =====
+async function loadOverviewStats(links) {
+  const dayTotals = {}; // day -> total clicks across all links
+  await Promise.all((links || []).map(async (link) => {
+    const { data } = await sb.rpc("get_link_stats", { p_link_id: link.id });
+    (data || []).forEach(row => {
+      dayTotals[row.day] = (dayTotals[row.day] || 0) + Number(row.cnt || 0);
+    });
+  }));
+
+  const days = Object.keys(dayTotals).sort();
+  const totalViews = Object.values(dayTotals).reduce((a, b) => a + b, 0);
+  document.getElementById("ovTotalViews").textContent = totalViews;
+
+  // الأرباح والـ CPM بتفضل صفر لحد ما يتم ربط شبكة إعلانات حقيقية —
+  // مفيش قيمة وهمية بتتحسب هنا، القيم دي حقيقية طالما مفيش مصدر أرباح فعلي.
+  document.getElementById("ovTotalEarnings").textContent = `0.000 ${t("egp")}`;
+  document.getElementById("ovAvgCpm").textContent = "0";
+  document.getElementById("ovEarningsNote").classList.remove("hidden");
+
+  const canvas = document.getElementById("overviewChart");
+  const noStats = document.getElementById("noOverviewStats");
+  if (overviewChartInstance) { overviewChartInstance.destroy(); overviewChartInstance = null; }
+
+  if (!days.length) {
+    canvas.classList.add("hidden");
+    noStats.classList.remove("hidden");
+    document.getElementById("visitsBody").innerHTML = "";
+    document.getElementById("noVisits").classList.remove("hidden");
+    return;
+  }
+
+  canvas.classList.remove("hidden");
+  noStats.classList.add("hidden");
+  const last14 = days.slice(-14);
+  overviewChartInstance = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: last14,
+      datasets: [{
+        label: t("ov_total_views"),
+        data: last14.map(d => dayTotals[d]),
+        borderColor: "#39e5d1",
+        backgroundColor: "rgba(57,229,209,0.15)",
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      scales: {
+        x: { ticks: { color: "#eafdfb" }, grid: { color: "rgba(234,253,251,0.1)" } },
+        y: { ticks: { color: "#eafdfb" }, grid: { color: "rgba(234,253,251,0.1)" }, beginAtZero: true }
+      },
+      plugins: { legend: { labels: { color: "#eafdfb" } } }
+    }
+  });
+
+  // جدول تفاصيل الزيارات (نفس البيانات الحقيقية، من الأحدث للأقدم)
+  const visitsBody = document.getElementById("visitsBody");
+  visitsBody.innerHTML = "";
+  document.getElementById("noVisits").classList.add("hidden");
+  days.slice().reverse().forEach(day => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHtml(day)}</td><td>${dayTotals[day]}</td>`;
+    visitsBody.appendChild(tr);
+  });
+}
+
+// ===== إعدادات الحساب (بريد + تغيير باسورد فعلي عبر Supabase Auth) =====
+async function loadSettingsPanel(user) {
+  document.getElementById("settingsEmail").value = user.email || "";
+}
+
+document.getElementById("settingsSaveBtn").addEventListener("click", async () => {
+  const errEl = document.getElementById("settingsErr");
+  const okEl = document.getElementById("settingsOk");
+  errEl.textContent = ""; okEl.textContent = "";
+  const newPassword = document.getElementById("newPasswordSettings").value;
+  if (!newPassword) { errEl.textContent = t("settings_password_empty_error"); return; }
+  if (newPassword.length < 6) { errEl.textContent = t("settings_password_short_error"); return; }
+  const { error } = await sb.auth.updateUser({ password: newPassword });
+  if (error) { errEl.textContent = t("generic_error"); return; }
+  okEl.textContent = t("settings_saved");
+  document.getElementById("newPasswordSettings").value = "";
+});
   const { data } = await sb.from("withdrawals").select("*").eq("user_id", userId).order("created_at", { ascending: false });
   const body = document.getElementById("withdrawalsBody");
   body.innerHTML = "";
@@ -440,7 +654,9 @@ async function loadReferral() {
   linkEl.textContent = link;
   linkEl.dataset.link = link;
   document.getElementById("referredCount").textContent = data.referred_count;
-  document.getElementById("referralEarned").textContent = `${Number(data.bonus_earned).toFixed(2)} ${t("egp")}`;
+  const earnedText = `${Number(data.bonus_earned).toFixed(2)} ${t("egp")}`;
+  document.getElementById("referralEarned").textContent = earnedText;
+  document.getElementById("ovReferralEarnings").textContent = earnedText;
 }
 
 document.getElementById("referralLink").addEventListener("click", function () {
@@ -460,10 +676,15 @@ async function refreshAll() {
     document.getElementById("bannedOverlay").classList.remove("hidden");
     return;
   }
-  document.getElementById("balanceNum").textContent = `${(currentProfile.balance || 0).toFixed(2)} ${t("egp")}`;
-  loadLinks(user.id);
+  const balanceText = `${(currentProfile.balance || 0).toFixed(2)} ${t("egp")}`;
+  const navBalance = document.getElementById("navBalance");
+  navBalance.textContent = balanceText;
+  navBalance.classList.remove("hidden");
+  await loadLinks(user.id);
   loadWithdrawals(user.id);
   loadReferral();
+  loadOverviewStats(allLinks);
+  loadSettingsPanel(user);
 }
 
 document.getElementById("bannedLogoutBtn").addEventListener("click", async () => {
