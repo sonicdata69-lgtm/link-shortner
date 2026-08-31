@@ -299,7 +299,7 @@
   <div id="redirectText" data-i18n="redirect_text">جارٍ تحويلك إلى الرابط...</div>
   <button class="btn btn-ghost hidden" id="skipBtn" style="min-width:160px;"></button>
 
-  <div class="card" id="aboutUsCard" style="max-width:380px; text-align:start;">
+  <div class="card hidden" id="aboutUsCard" style="max-width:380px; text-align:start;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--cyan);"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"></path><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"></path></svg>
       <strong style="font-family:'Space Grotesk',sans-serif; font-size:17px;" data-i18n="about_us_title">عن zlink</strong>
@@ -367,14 +367,14 @@
     </div>
 
     <div class="tagline-section" style="text-align: center; margin-bottom: 60px; padding: 30px; background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(16, 185, 129, 0.1)); border-radius: 16px; border: 1px solid rgba(6, 182, 212, 0.2);">
-      <h2 style="font-size: 24px; font-weight: 900; margin: 0 0 16px 0; background: linear-gradient(135deg, #06b6d4, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">مع zlink بدايتك للربح من اختصار الروابط 💸</h2>
+      <h2 style="font-size: 24px; font-weight: 900; margin: 0 0 16px 0; background: linear-gradient(135deg, #06b6d4, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" data-i18n="tagline_main">مع zlink بدايتك للربح من اختصار الروابط 💸</h2>
       <p style="font-size: 15px; color: rgba(234, 253, 251, 0.8); margin: 0 0 24px 0; line-height: 1.8; max-width: 600px; margin-left: auto; margin-right: auto;">
-        <strong>أسباب اختيارك لينا:</strong><br>
-        ✅ الثقة والأمان 🔒<br>
-        ✅ تسهيل تجربة الزوار لضمان تجربة سهلة<br>
-        ✅ سحب ارباح يومي بدون تأخير ⚡<br>
-        ✅ أفضل عائد CPM 💵<br>
-        ✅ دعم فني متواجد طوال اليوم 🧑🏻‍💻
+        <strong data-i18n="tagline_reasons">أسباب اختيارك لينا:</strong><br>
+        ✅ <span data-i18n="tagline_reason1">الثقة والأمان 🔒</span><br>
+        ✅ <span data-i18n="tagline_reason2">تسهيل تجربة الزوار لضمان تجربة سهلة</span><br>
+        ✅ <span data-i18n="tagline_reason3">سحب ارباح يومي بدون تأخير ⚡</span><br>
+        ✅ <span data-i18n="tagline_reason4">أفضل عائد CPM 💵</span><br>
+        ✅ <span data-i18n="tagline_reason5">دعم فني متواجد طوال اليوم 🧑🏻‍💻</span>
       </p>
     </div>
 
@@ -517,7 +517,16 @@ async function proceedWithAd(target) {
   const adSeconds = (settings && settings.ad_seconds) || 0;
   const adHtml = (settings && settings.ad_html) || "";
 
-  if (adHtml) document.getElementById("adSlot").innerHTML = adHtml;
+  // Only show the "about zlink" fallback card when there's no real ad slot
+  // configured yet, so a visitor is never left staring at a promo card
+  // instead of the actual skip flow.
+  const aboutCard = document.getElementById("aboutUsCard");
+  if (adHtml) {
+    document.getElementById("adSlot").innerHTML = adHtml;
+    aboutCard.classList.add("hidden");
+  } else {
+    aboutCard.classList.remove("hidden");
+  }
 
   if (adSeconds > 0) {
     const skipBtn = document.getElementById("skipBtn");
@@ -535,8 +544,13 @@ async function proceedWithAd(target) {
     };
     tick();
     const timer = setInterval(tick, 1000);
-    skipBtn.addEventListener("click", () => { if (!skipBtn.disabled) location.replace(target); });
+    skipBtn.addEventListener("click", () => {
+      if (skipBtn.disabled) return;
+      aboutCard.classList.add("hidden");
+      location.replace(target);
+    });
   } else {
+    aboutCard.classList.add("hidden");
     location.replace(target);
   }
 }

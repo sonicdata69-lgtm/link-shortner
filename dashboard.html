@@ -157,13 +157,10 @@
     <label for="amount" data-i18n="amount_label">المبلغ</label>
     <input type="number" id="amount" class="url-input" placeholder="0" />
     <label for="method" data-i18n="method_label">طريقة السحب</label>
-    <select id="method">
-      <option value="vodafone_cash">فودافون كاش</option>
-      <option value="instapay">إنستاباي</option>
-      <option value="binance">باينانس</option>
-    </select>
+    <select id="method"></select>
     <label for="details" data-i18n="details_label">بيانات الحساب (رقم / يوزر / عنوان محفظة)</label>
     <input type="text" id="details" class="url-input" placeholder="" />
+    <p style="font-size:12px; color:rgba(234,253,251,0.6); margin:6px 0 0;" data-i18n="withdraw_turnaround_note">⚡ استلام الأرباح يوميًا بحد أقصى 24 ساعة من وقت الطلب.</p>
     <div class="error-msg" id="wErrorMsg"></div>
     <div class="success-msg" id="wSuccessMsg"></div>
     <button class="btn" id="withdrawBtn">

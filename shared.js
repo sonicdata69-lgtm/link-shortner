@@ -35,7 +35,7 @@ const I18N = {
     auth_error: "بيانات غير صحيحة أو حدث خطأ",
     dash_title: "لوحة التحكم",
     balance_label: "رصيدك الحالي",
-    egp: "جنيه",
+    egp: "دولار",
     my_links: "روابطي",
     link_col_short: "الرابط المختصر",
     link_col_clicks: "عدد النقرات",
@@ -73,7 +73,7 @@ const I18N = {
     users_col_balance: "الرصيد",
     users_col_joined: "تاريخ التسجيل",
     settings_site_name: "اسم الموقع",
-    settings_rate: "الأرباح لكل 1000 نقرة (جنيه)",
+    settings_rate: "الأرباح لكل 1000 نقرة (دولار)",
     settings_min_withdraw: "أقل مبلغ للسحب",
     settings_ad_html: "كود الإعلان (HTML/JS)",
     settings_ad_seconds: "ثواني الانتظار قبل التخطي",
@@ -136,8 +136,8 @@ const I18N = {
     wrong_password: "كلمة المرور غير صحيحة",
     link_expired: "هذا الرابط منتهي الصلاحية ⏰",
     export_csv: "تصدير CSV",
-    referral_bonus_referrer_label: "مكافأة صاحب الدعوة (جنيه) — غير مُفعّلة حاليًا",
-    referral_bonus_referred_label: "مكافأة المستخدم الجديد (جنيه) — غير مُفعّلة حاليًا",
+    referral_bonus_referrer_label: "مكافأة صاحب الدعوة (دولار) — غير مُفعّلة حاليًا",
+    referral_bonus_referred_label: "مكافأة المستخدم الجديد (دولار) — غير مُفعّلة حاليًا",
     search_email_placeholder: "ابحث بالبريد الإلكتروني",
     ban_btn: "حظر",
     banned_badge: "محظور",
@@ -175,6 +175,7 @@ const I18N = {
     link_col_actions: "إجراءات",
     account_banned_title: "حسابك محظور",
     account_banned_desc: "تواصل مع الدعم لمزيد من التفاصيل.",
+    withdraw_turnaround_note: "⚡ استلام الأرباح يوميًا بحد أقصى 24 ساعة من وقت الطلب.",
   },
   en: {
     dir: "ltr",
@@ -205,7 +206,7 @@ const I18N = {
     auth_error: "Invalid credentials or error occurred",
     dash_title: "Dashboard",
     balance_label: "Your balance",
-    egp: "EGP",
+    egp: "USD",
     my_links: "My links",
     link_col_short: "Short link",
     link_col_clicks: "Clicks",
@@ -243,7 +244,7 @@ const I18N = {
     users_col_balance: "Balance",
     users_col_joined: "Joined",
     settings_site_name: "Site name",
-    settings_rate: "Earnings per 1000 clicks (EGP)",
+    settings_rate: "Earnings per 1000 clicks (USD)",
     settings_min_withdraw: "Minimum withdrawal",
     settings_ad_html: "Ad code (HTML/JS)",
     settings_ad_seconds: "Seconds before skip",
@@ -306,8 +307,8 @@ const I18N = {
     wrong_password: "Wrong password",
     link_expired: "This link has expired ⏰",
     export_csv: "Export CSV",
-    referral_bonus_referrer_label: "Referrer bonus (EGP) — not active yet",
-    referral_bonus_referred_label: "New user bonus (EGP) — not active yet",
+    referral_bonus_referrer_label: "Referrer bonus (USD) — not active yet",
+    referral_bonus_referred_label: "New user bonus (USD) — not active yet",
     search_email_placeholder: "Search by email",
     ban_btn: "Ban",
     banned_badge: "Banned",
@@ -345,6 +346,7 @@ const I18N = {
     link_col_actions: "Actions",
     account_banned_title: "Your account is banned",
     account_banned_desc: "Contact support for more details.",
+    withdraw_turnaround_note: "⚡ Earnings are paid out daily, within 24 hours of your request.",
   }
 };
 
@@ -381,6 +383,24 @@ function applyI18n() {
   document.querySelectorAll(".lang-btn").forEach(b => {
     b.classList.toggle("active", b.dataset.lang === lang);
   });
+  populateMethodSelect();
+}
+
+// إعادة بناء قائمة طرق السحب باللغة الحالية، مع الحفاظ على القيمة المختارة
+function populateMethodSelect() {
+  const select = document.getElementById("method");
+  if (!select) return;
+  const lang = getLang();
+  const labels = METHOD_LABELS[lang] || METHOD_LABELS.ar;
+  const previous = select.value;
+  select.innerHTML = "";
+  Object.keys(labels).forEach(value => {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = labels[value];
+    select.appendChild(opt);
+  });
+  if (previous) select.value = previous;
 }
 
 function initLangSwitcher() {
