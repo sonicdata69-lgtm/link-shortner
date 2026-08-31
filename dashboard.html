@@ -1,807 +1,1890 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZLINK | لوحة التحكم</title>
 
-    <title>ZLINK | لوحة التحكم</title>
+<link rel="stylesheet" href="style.css">
 
-    <link rel="stylesheet" href="style.css">
+<style>
+.mobile-bottom{display:none}
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="shared.js"></script>
+.mobile-bottom a,
+.mobile-bottom button{
+  font:inherit;
+  color:#7f89a3;
+  text-decoration:none;
+  background:none;
+  border:0;
+}
+
+.mobile-bottom .active{color:#a98cff}
+
+.mobile-bottom .add{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#704cff,#a34fff);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:28px;
+  box-shadow:0 8px 25px rgba(112,76,255,.38);
+  transform:translateY(-14px);
+  border:4px solid #070b18;
+}
+
+.link-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 20px;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+
+.link-row .code{
+  color:#a98cff;
+  font-weight:700;
+  font-size:12px;
+  min-width:72px;
+}
+
+.link-row .dest{
+  color:#9ba4bd;
+  font-size:10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  flex:1;
+  direction:ltr;
+  text-align:right;
+}
+
+.link-row .clicks{
+  font-size:11px;
+  color:#fff;
+  white-space:nowrap;
+}
+
+.link-row .copy{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);
+  color:#aeb6ca;
+  border-radius:7px;
+  padding:6px 8px;
+}
+
+.referral-box{
+  padding:14px 20px 20px;
+}
+
+.referral-code{
+  direction:ltr;
+  text-align:left;
+  padding:11px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+  font-size:11px;
+  color:#bba9ff;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.referral-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+
+.referral-stat{
+  padding:10px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:9px;
+  text-align:center;
+}
+
+.referral-stat span{
+  display:block;
+  color:#78829c;
+  font-size:9px;
+}
+
+.referral-stat strong{
+  display:block;
+  margin-top:4px;
+  font-size:16px;
+}
+
+.empty-mini{
+  padding:25px 15px;
+  text-align:center;
+  color:#68738c;
+  font-size:10px;
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:88px;
+  transform:translateX(-50%) translateY(20px);
+  background:#121a2e;
+  border:1px solid rgba(112,76,255,.35);
+  color:#fff;
+  padding:10px 15px;
+  border-radius:10px;
+  font-size:11px;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  z-index:500;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+@media(max-width:800px){
+
+  body{
+    padding-bottom:78px;
+  }
+
+  .sidebar{
+    display:none!important;
+  }
+
+  .topbar{
+    height:64px;
+    position:sticky;
+    top:0;
+    z-index:90;
+  }
+
+  .topbar .search-box{
+    display:none;
+  }
+
+  .topbar .top-actions{
+    margin-right:auto;
+  }
+
+  .mobile-bottom{
+    position:fixed;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1fr 1fr;
+    align-items:end;
+    bottom:0;
+    left:0;
+    right:0;
+    height:68px;
+    padding:6px 10px max(6px,env(safe-area-inset-bottom));
+    background:rgba(7,11,24,.96);
+    border-top:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(18px);
+    z-index:200;
+  }
+
+  .mobile-bottom a,
+  .mobile-bottom button{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    font-size:10px;
+  }
+
+  .mobile-bottom .add-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .content{
+    padding:14px 10px 20px;
+  }
+
+  .welcome-row{
+    margin-bottom:14px;
+  }
+
+  .welcome-row h1{
+    font-size:20px;
+  }
+
+  .welcome-row p{
+    font-size:10px;
+  }
+
+  .date-filter{
+    display:none;
+  }
+
+  .stats-grid{
+    gap:8px;
+  }
+
+  .stat-card{
+    min-height:92px;
+    padding:10px;
+    gap:7px;
+  }
+
+  .stat-card strong{
+    font-size:19px;
+  }
+
+  .stat-card span{
+    font-size:9px;
+  }
+
+  .stat-card small{
+    font-size:7px;
+  }
+
+  .stat-icon{
+    width:34px;
+    height:34px;
+    flex-basis:34px;
+    font-size:15px;
+  }
+
+  .analytics-grid{
+    gap:10px;
+  }
+
+  .panel{
+    border-radius:13px;
+  }
+
+  .panel-head{
+    padding:14px;
+  }
+
+  .panel-head h2{
+    font-size:14px;
+  }
+
+  .chart-wrap{
+    padding:0 10px 12px;
+  }
+
+  .chart-svg{
+    width:100%;
+    height:190px;
+    display:block;
+  }
+
+  .recent-links .link-row{
+    padding:12px 14px;
+  }
+
+  .link-row .dest{
+    max-width:52vw;
+  }
+
+  .bottom-grid{
+    gap:10px;
+  }
+}
+
+@media(min-width:801px){
+
+  .chart-svg{
+    width:100%;
+    height:220px;
+    display:block;
+  }
+}
+</style>
 </head>
 
-<body class="dashboard-page">
+<body>
 
 <div class="dash-shell">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
+<aside class="sidebar">
 
-        <div class="brand">
-            <span>Z</span>LINK
-        </div>
+<div class="brand">
+<span>Z</span>LINK
+</div>
 
-        <button class="new-link-btn" id="newLinkBtn">
-            <span>＋</span>
-            اختصار رابط جديد
-        </button>
+<button class="new-link-btn" id="desktopNewLink">
+<span>＋</span>
+إنشاء رابط جديد
+</button>
 
-        <nav class="side-nav">
+<nav class="side-nav">
 
-            <a class="active" href="dashboard.html">
-                <span>▦</span>
-                لوحة التحكم
-            </a>
+<a class="active" href="dashboard.html">
+<span>⌂</span>
+لوحة التحكم
+</a>
 
-            <a href="#links">
-                <span>🔗</span>
-                روابطي
-            </a>
+<a href="#links">
+<span>🔗</span>
+روابطي
+</a>
 
-            <a href="#stats">
-                <span>▥</span>
-                الإحصائيات
-            </a>
+<a href="#stats">
+<span>▥</span>
+إحصائيات
+</a>
 
-            <a href="#">
-                <span>▢</span>
-                المجلدات
-            </a>
+<a href="#referrals">
+<span>♧</span>
+الإحالات
+</a>
 
-            <a href="#">
-                <span>▤</span>
-                الفواتير
-                <small>جديد</small>
-            </a>
+<a href="#balance">
+<span>＄</span>
+الأرباح
+</a>
 
-            <a href="#">
-                <span>◉</span>
-                API
-            </a>
+<a href="#withdraw">
+<span>▣</span>
+السحب
+</a>
 
-            <a href="#">
-                <span>⚙</span>
-                الإعدادات
-            </a>
+<a href="#settings">
+<span>⚙</span>
+الإعدادات
+</a>
 
-        </nav>
+</nav>
 
-        <div class="upgrade-card">
+<div class="upgrade-card">
 
-            <div class="upgrade-icon">♛</div>
+<div class="upgrade-icon">♛</div>
 
-            <h3>الترقية إلى Pro</h3>
+<h3>ZLINK</h3>
 
-            <p>
-                احصل على ميزات إضافية
-                وإحصائيات متقدمة.
-            </p>
+<p>
+اختصر روابطك وتابع نتائجك من مكان واحد.
+</p>
 
-            <button>الترقية الآن</button>
+<button id="logoutDesktop">
+تسجيل الخروج
+</button>
 
-        </div>
+</div>
 
-        <div class="sidebar-user">
+</aside>
 
-            <div class="avatar" id="sideAvatar">
-                M
-            </div>
 
-            <div>
-                <strong id="sideName">
-                    حسابي
-                </strong>
+<main class="dash-main">
 
-                <span>
-                    الحساب الشخصي
-                </span>
-            </div>
+<header class="topbar">
 
-        </div>
+<button class="menu-btn" id="menuBtn">
+☰
+</button>
 
-        <button class="logout-btn" id="navLogout">
-            ⇥ تسجيل الخروج
-        </button>
+<div class="search-box">
+<span>⌕</span>
+<input
+id="topSearch"
+placeholder="ابحث عن رابط..."
+>
+</div>
 
-    </aside>
+<div class="top-actions">
 
+<button class="icon-btn">
+♟
+<i>0</i>
+</button>
 
-    <!-- Main -->
-    <main class="dash-main">
+<div class="profile-mini">
 
-        <header class="topbar">
+<div class="avatar" id="avatar">
+Z
+</div>
 
-            <button class="menu-btn" id="menuBtn">
-                ☰
-            </button>
+<div>
+<strong id="topName">
+ZLINK
+</strong>
 
-            <div class="search-box">
-                🔎
-                <input
-                    id="searchInput"
-                    type="search"
-                    placeholder="ابحث عن رابط..."
-                >
-            </div>
+<span id="topEmail"></span>
 
-            <div class="top-actions">
+</div>
 
-                <button class="icon-btn">
-                    🔔
-                    <i>3</i>
-                </button>
+</div>
 
-                <button class="theme-btn">
-                    ◐
-                </button>
+</div>
 
-                <div class="profile-mini">
+</header>
 
-                    <div class="avatar" id="topAvatar">
-                        M
-                    </div>
 
-                    <div>
-                        <strong id="topName">
-                            medoo dragona
-                        </strong>
+<section class="content">
 
-                        <span>
-                            الحساب الشخصي
-                        </span>
-                    </div>
+<div class="welcome-row">
 
-                    <span>⌄</span>
+<div>
 
-                </div>
+<h1>
+مرحبًا بك،
+<span id="welcomeName">...</span>
+👋
+</h1>
 
-            </div>
+<p>
+إدارة روابطك المختصرة ومتابعة أدائها بسهولة.
+</p>
 
-        </header>
+</div>
 
-
-        <section class="content">
-
-            <!-- Welcome -->
-
-            <div class="welcome-row">
-
-                <div>
-
-                    <h1>
-                        مرحبًا بك،
-                        <span id="welcomeName">medoo</span> 👋
-                    </h1>
-
-                    <p>
-                        إدارة روابطك المختصرة ومتابعة أدائها بسهولة.
-                    </p>
-
-                </div>
-
-                <button class="date-filter">
-                    آخر 7 أيام　▣
-                </button>
-
-            </div>
-
-
-            <!-- Stats -->
-
-            <section class="stats-grid">
-
-                <div class="stat-card purple">
-
-                    <div class="stat-icon">🔗</div>
-
-                    <div>
-                        <span>إجمالي الروابط</span>
-                        <strong id="totalLinks">0</strong>
-                        <small>↗ 15% عن الأسبوع الماضي</small>
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card green">
-
-                    <div class="stat-icon">⌁</div>
-
-                    <div>
-                        <span>إجمالي الزيارات</span>
-                        <strong id="totalClicks">0</strong>
-                        <small>↗ 28% عن الأسبوع الماضي</small>
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card blue">
-
-                    <div class="stat-icon">◉</div>
-
-                    <div>
-                        <span>زيارات اليوم</span>
-                        <strong id="todayClicks">0</strong>
-                        <small>↗ 12% عن أمس</small>
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card orange">
-
-                    <div class="stat-icon">⌁</div>
-
-                    <div>
-                        <span>متوسط النقرات</span>
-                        <strong id="averageClicks">0</strong>
-                        <small>نقرة لكل رابط</small>
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card pink">
-
-                    <div class="stat-icon">♧</div>
-
-                    <div>
-                        <span>الزوار</span>
-                        <strong id="visitors">0</strong>
-                        <small>↗ 18% عن الأسبوع الماضي</small>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- Charts -->
-
-            <section class="analytics-grid" id="stats">
-
-                <div class="panel chart-panel">
-
-                    <div class="panel-head">
-
-                        <div>
-                            <h2>الزيارات خلال آخر 7 أيام</h2>
-                            <span>أداء روابطك خلال الأسبوع</span>
-                        </div>
-
-                        <button>آخر 7 أيام⌄</button>
-
-                    </div>
-
-                    <div class="fake-chart">
-
-                        <div class="chart-line"></div>
-
-                        <div class="chart-labels">
-                            <span>السبت</span>
-                            <span>الأحد</span>
-                            <span>الإثنين</span>
-                            <span>الثلاثاء</span>
-                            <span>الأربعاء</span>
-                            <span>الخميس</span>
-                            <span>الجمعة</span>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel sources-panel">
-
-                    <div class="panel-head">
-
-                        <div>
-                            <h2>أفضل المصادر</h2>
-                            <span>مصادر زيارات روابطك</span>
-                        </div>
-
-                    </div>
-
-                    <div class="donut-wrap">
-
-                        <div class="donut">
-                            <div>
-                                <strong>100%</strong>
-                                <span>الزيارات</span>
-                            </div>
-                        </div>
-
-                        <div class="source-list">
-
-                            <div>
-                                <i class="purple-dot"></i>
-                                مباشر
-                                <strong>45%</strong>
-                            </div>
-
-                            <div>
-                                <i class="green-dot"></i>
-                                Google
-                                <strong>30%</strong>
-                            </div>
-
-                            <div>
-                                <i class="blue-dot"></i>
-                                Twitter
-                                <strong>15%</strong>
-                            </div>
-
-                            <div>
-                                <i class="orange-dot"></i>
-                                Facebook
-                                <strong>10%</strong>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel countries-panel">
-
-                    <div class="panel-head">
-
-                        <div>
-                            <h2>الزيارات حسب الدولة</h2>
-                            <span>توزيع الزوار</span>
-                        </div>
-
-                    </div>
-
-                    <div class="country-list">
-
-                        <div>
-                            <span>🇪🇬 مصر</span>
-                            <strong>45%</strong>
-                        </div>
-
-                        <div>
-                            <span>🇸🇦 السعودية</span>
-                            <strong>20%</strong>
-                        </div>
-
-                        <div>
-                            <span>🇲🇦 المغرب</span>
-                            <strong>10%</strong>
-                        </div>
-
-                        <div>
-                            <span>🇺🇸 أمريكا</span>
-                            <strong>8%</strong>
-                        </div>
-
-                        <div>
-                            <span>🌍 أخرى</span>
-                            <strong>17%</strong>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- Links -->
-
-            <section class="panel links-panel" id="links">
-
-                <div class="links-head">
-
-                    <div>
-                        <h2>
-                            روابطي
-                            <b id="linkCountBadge">0 رابط</b>
-                        </h2>
-
-                        <span>
-                            إدارة جميع روابطك المختصرة
-                        </span>
-                    </div>
-
-                    <div class="links-actions">
-
-                        <button class="secondary-btn">
-                            ↓ تصدير
-                        </button>
-
-                        <button class="new-link-small" id="newLinkBtn2">
-                            ＋ اختصار رابط جديد
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="table-tools">
-
-                    <div class="search-table">
-
-                        🔎
-
-                        <input
-                            id="tableSearch"
-                            placeholder="ابحث عن رابط..."
-                        >
-
-                    </div>
-
-                    <button>
-                        ⚱ تصفية
-                    </button>
-
-                    <button>
-                        ▣ المجلدات⌄
-                    </button>
-
-                </div>
-
-
-                <div class="table-wrap">
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-
-                                <th>الرابط المختصر</th>
-
-                                <th>الرابط الأصلي</th>
-
-                                <th>الزيارات</th>
-
-                                <th>تاريخ الإنشاء</th>
-
-                                <th>المصدر</th>
-
-                                <th>إجراءات</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="linksTable">
-
-                            <tr>
-
-                                <td colspan="6">
-
-                                    <div class="empty-state">
-
-                                        <div>🔗</div>
-
-                                        <h3>لا توجد روابط حتى الآن</h3>
-
-                                        <p>
-                                            ابدأ بإنشاء أول رابط مختصر لك.
-                                        </p>
-
-                                        <button id="emptyCreateBtn">
-                                            ＋ اختصار رابط
-                                        </button>
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-
-            <!-- Bottom widgets -->
-
-            <section class="bottom-grid">
-
-                <div class="panel">
-
-                    <div class="panel-head">
-                        <h2>أفضل الروابط</h2>
-                        <span>حسب عدد الزيارات</span>
-                    </div>
-
-                    <div class="mini-list" id="topLinks">
-
-                        <div class="mini-empty">
-                            لا توجد بيانات بعد
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel">
-
-                    <div class="panel-head">
-                        <h2>أفضل الأجهزة</h2>
-                        <span>نوع الجهاز</span>
-                    </div>
-
-                    <div class="device-bars">
-
-                        <div>
-                            <span>📱 موبايل</span>
-                            <strong>62%</strong>
-                        </div>
-
-                        <div class="bar">
-                            <i style="width:62%"></i>
-                        </div>
-
-
-                        <div>
-                            <span>💻 كمبيوتر</span>
-                            <strong>30%</strong>
-                        </div>
-
-                        <div class="bar">
-                            <i style="width:30%"></i>
-                        </div>
-
-
-                        <div>
-                            <span>📟 تابلت</span>
-                            <strong>8%</strong>
-                        </div>
-
-                        <div class="bar">
-                            <i style="width:8%"></i>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel tip-panel">
-
-                    <div class="tip-icon">
-                        💡
-                    </div>
-
-                    <h2>
-                        نصيحة اليوم
-                    </h2>
-
-                    <p>
-                        استخدم الروابط القصيرة في حملاتك
-                        التسويقية لزيادة التفاعل وقياس الأداء
-                        بشكل أفضل.
-                    </p>
-
-                    <button>
-                        مزيد من النصائح
-                    </button>
-
-                </div>
-
-            </section>
-
-        </section>
-
-    </main>
+<button class="date-filter">
+آخر 7 أيام
+</button>
 
 </div>
 
 
-<!-- Modal -->
+<div class="stats-grid" id="stats">
 
-<div class="modal hidden" id="linkModal">
+<div class="stat-card">
 
-    <div class="modal-box">
+<div class="stat-icon">
+🔗
+</div>
 
-        <button class="modal-close" id="modalClose">
-            ×
-        </button>
+<div>
 
-        <div class="modal-icon">
-            🔗
-        </div>
+<span>
+إجمالي الروابط
+</span>
 
-        <h2>اختصار رابط جديد</h2>
+<strong id="totalLinks">
+—
+</strong>
 
-        <p>
-            الصق الرابط الطويل لإنشاء رابط مختصر.
-        </p>
-
-        <input
-            id="longUrl"
-            type="url"
-            placeholder="https://example.com/very-long-link"
-        >
-
-        <input
-            id="customAlias"
-            type="text"
-            placeholder="اسم مخصص للرابط (اختياري)"
-        >
-
-        <button class="modal-submit" id="createLinkBtn">
-            اختصر الرابط الآن
-        </button>
-
-        <div id="modalMessage"></div>
-
-    </div>
+<small>
+روابطك الحالية
+</small>
 
 </div>
+
+</div>
+
+
+<div class="stat-card green">
+
+<div class="stat-icon">
+◉
+</div>
+
+<div>
+
+<span>
+إجمالي الزيارات
+</span>
+
+<strong id="totalClicks">
+—
+</strong>
+
+<small>
+من بيانات النقرات
+</small>
+
+</div>
+
+</div>
+
+
+<div class="stat-card blue">
+
+<div class="stat-icon">
+◉
+</div>
+
+<div>
+
+<span>
+زيارات اليوم
+</span>
+
+<strong id="todayClicks">
+—
+</strong>
+
+<small>
+اليوم
+</small>
+
+</div>
+
+</div>
+
+
+<div class="stat-card orange">
+
+<div class="stat-icon">
+⌁
+</div>
+
+<div>
+
+<span>
+متوسط النقرات
+</span>
+
+<strong id="avgClicks">
+—
+</strong>
+
+<small>
+لكل رابط
+</small>
+
+</div>
+
+</div>
+
+
+<div class="stat-card pink">
+
+<div class="stat-icon">
+♧
+</div>
+
+<div>
+
+<span>
+الزوار الفريدون
+</span>
+
+<strong id="uniqueVisitors">
+—
+</strong>
+
+<small>
+حسب visitor_id
+</small>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="analytics-grid">
+
+
+<section class="panel chart-panel">
+
+<div class="panel-head">
+
+<div>
+
+<h2>
+الزيارات خلال آخر 7 أيام
+</h2>
+
+<span>
+بيانات حقيقية من link_clicks
+</span>
+
+</div>
+
+<span id="chartTotal">
+—
+</span>
+
+</div>
+
+<div class="chart-wrap">
+
+<svg
+id="visitsChart"
+class="chart-svg"
+viewBox="0 0 700 220"
+preserveAspectRatio="none"
+>
+</svg>
+
+</div>
+
+</section>
+
+
+<section class="panel" id="balance">
+
+<div class="panel-head">
+
+<div>
+
+<h2>
+الرصيد الحالي
+</h2>
+
+<span>
+من profiles.balance
+</span>
+
+</div>
+
+</div>
+
+<div class="tip-panel">
+
+<div class="tip-icon">
+💳
+</div>
+
+<h2 id="balanceValue">
+$0.00
+</h2>
+
+<p>
+الرصيد المعروض مأخوذ مباشرة من حسابك في Supabase.
+</p>
+
+<button onclick="location.hash='withdraw'">
+طلب سحب
+</button>
+
+</div>
+
+</section>
+
+
+<section class="panel" id="referrals">
+
+<div class="panel-head">
+
+<div>
+
+<h2>
+الإحالات
+</h2>
+
+<span>
+من profiles و referral_ledger
+</span>
+
+</div>
+
+</div>
+
+<div class="referral-box">
+
+<div
+class="referral-code"
+id="referralLink"
+>
+—
+</div>
+
+<div class="referral-stats">
+
+<div class="referral-stat">
+
+<span>
+الأصدقاء
+</span>
+
+<strong id="referralCount">
+—
+</strong>
+
+</div>
+
+<div class="referral-stat">
+
+<span>
+المكافآت
+</span>
+
+<strong id="referralEarned">
+$0
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+
+<section class="panel recent-links" id="links">
+
+<div class="links-head">
+
+<div>
+
+<h2>
+آخر الروابط
+<b id="linkCountBadge">0</b>
+</h2>
+
+<span>
+روابطك الفعلية من Supabase
+</span>
+
+</div>
+
+<div class="links-actions">
+
+<button
+class="new-link-small"
+id="newLinkBtn"
+>
+＋ رابط جديد
+</button>
+
+</div>
+
+</div>
+
+
+<div class="table-tools">
+
+<div class="search-table">
+
+<span>⌕</span>
+
+<input
+id="linkSearch"
+placeholder="دور في روابطك"
+>
+
+</div>
+
+</div>
+
+
+<div id="linksList">
+
+<div class="empty-mini">
+جارٍ تحميل الروابط...
+</div>
+
+</div>
+
+</section>
+
+
+<div
+class="bottom-grid"
+style="margin-top:16px"
+>
+
+
+<section class="panel" id="withdraw">
+
+<div class="panel-head">
+
+<div>
+
+<h2>
+السحب
+</h2>
+
+<span>
+طلبات السحب الخاصة بحسابك
+</span>
+
+</div>
+
+</div>
+
+<div class="tip-panel">
+
+<div class="tip-icon">
+💵
+</div>
+
+<p>
+الحد الأدنى للسحب وإعداداته تُقرأ من جدول settings.
+</p>
+
+<button onclick="location.hash='withdraw'">
+إدارة السحب
+</button>
+
+</div>
+
+</section>
+
+
+<section class="panel">
+
+<div class="panel-head">
+
+<div>
+
+<h2>
+ملاحظة
+</h2>
+
+<span>
+البيانات الحقيقية فقط
+</span>
+
+</div>
+
+</div>
+
+<div class="tip-panel">
+
+<p>
+لن يتم عرض مصادر Google أو Facebook أو Twitter أو نسب مصطنعة لأن قاعدة البيانات الحالية لا تحتوي حقلًا حقيقيًا لمصدر الزيارة.
+</p>
+
+</div>
+
+</section>
+
+
+<section class="panel" id="settings">
+
+<div class="panel-head">
+
+<div>
+
+<h2>
+الحساب
+</h2>
+
+<span>
+بيانات المستخدم
+</span>
+
+</div>
+
+</div>
+
+<div class="tip-panel">
+
+<p id="accountInfo">
+جارٍ التحميل...
+</p>
+
+<button id="logoutMobileAlt">
+تسجيل الخروج
+</button>
+
+</div>
+
+</section>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+
+<nav class="mobile-bottom">
+
+<a
+class="active"
+href="dashboard.html"
+>
+
+<span>⌂</span>
+
+<b>
+الرئيسية
+</b>
+
+</a>
+
+
+<a href="#links">
+
+<span>🔗</span>
+
+<b>
+روابطي
+</b>
+
+</a>
+
+
+<div class="add-wrap">
+
+<button
+class="add"
+id="mobileNewLink"
+>
+＋
+</button>
+
+</div>
+
+
+<a href="#referrals">
+
+<span>♧</span>
+
+<b>
+الإحالات
+</b>
+
+</a>
+
+
+<a href="#balance">
+
+<span>＄</span>
+
+<b>
+الأرباح
+</b>
+
+</a>
+
+</nav>
+
+
+<div
+class="toast"
+id="toast"
+>
+</div>
+
+
+<div
+class="modal hidden"
+id="newLinkModal"
+>
+
+<div class="modal-box">
+
+<button
+class="modal-close"
+id="closeModal"
+>
+×
+</button>
+
+<div class="modal-icon">
+🔗
+</div>
+
+<h2>
+إنشاء رابط جديد
+</h2>
+
+<p>
+سيتم حفظ الرابط مباشرة في جدول links.
+</p>
+
+<input
+id="newUrl"
+type="url"
+placeholder="https://example.com/long-link"
+>
+
+<input
+id="newAlias"
+type="text"
+placeholder="اسم مخصص (اختياري)"
+maxlength="80"
+>
+
+<input
+id="newExpiry"
+type="datetime-local"
+>
+
+<button
+class="modal-submit"
+id="saveLink"
+>
+حفظ الرابط
+</button>
+
+<div id="modalMessage"></div>
+
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="shared.js"></script>
 
 
 <script>
 
-const modal = document.getElementById("linkModal");
+const $ = id => document.getElementById(id);
 
-function openModal() {
-    modal.classList.remove("hidden");
-    document.getElementById("longUrl").focus();
+let profile = null;
+let links = [];
+
+
+const fmt = n =>
+Number(n || 0).toLocaleString('ar-EG');
+
+
+const money = n =>
+'$' + Number(n || 0).toFixed(2);
+
+
+function toast(msg){
+
+const el = $('toast');
+
+el.textContent = msg;
+
+el.classList.add('show');
+
+setTimeout(
+() => el.classList.remove('show'),
+2200
+);
+
 }
 
-function closeModal() {
-    modal.classList.add("hidden");
+
+async function loadDashboard(){
+
+profile = await getCurrentProfile();
+
+if(!profile){
+
+location.href = 'auth.html';
+
+return;
+
 }
 
-document
-    .getElementById("newLinkBtn")
-    .addEventListener("click", openModal);
 
-document
-    .getElementById("newLinkBtn2")
-    .addEventListener("click", openModal);
+const name =
+(profile.email || 'ZLINK')
+.split('@')[0];
 
-document
-    .getElementById("emptyCreateBtn")
-    .addEventListener("click", openModal);
 
-document
-    .getElementById("modalClose")
-    .addEventListener("click", closeModal);
+$('welcomeName').textContent = name;
 
-modal.addEventListener("click", function(e) {
-    if (e.target === modal) {
-        closeModal();
-    }
+$('topName').textContent = name;
+
+$('topEmail').textContent =
+profile.email || '';
+
+$('avatar').textContent =
+name.slice(0,1).toUpperCase();
+
+
+$('balanceValue').textContent =
+money(profile.balance);
+
+
+$('accountInfo').textContent =
+profile.email || '—';
+
+
+const { data, error } =
+await sb
+.from('links')
+.select(
+'id,short_code,original_url,clicks,created_at,expires_at'
+)
+.eq('owner_id', profile.id)
+.order('created_at', {
+ascending:false
 });
 
 
-async function loadProfile() {
+if(error){
 
-    try {
+console.error(error);
 
-        const profile = await getCurrentProfile();
+toast('تعذر تحميل الروابط');
 
-        if (!profile) {
-            location.href = "auth.html";
-            return;
-        }
-
-        const name =
-            profile.name ||
-            profile.full_name ||
-            profile.email?.split("@")[0] ||
-            "medoo";
-
-        document.getElementById("welcomeName").textContent = name;
-        document.getElementById("topName").textContent = name;
-        document.getElementById("sideName").textContent = name;
-
-        const initial =
-            name.trim().charAt(0).toUpperCase();
-
-        document.getElementById("topAvatar").textContent = initial;
-        document.getElementById("sideAvatar").textContent = initial;
-
-    } catch (error) {
-
-        console.error(error);
-
-    }
+return;
 
 }
 
 
-async function loadLinks() {
+links = data || [];
 
-    /*
-      ملاحظة:
-      واجهة الـDashboard جاهزة بالكامل.
-      ربط جدول الروابط يتم مع جدول Supabase
-      الموجود في مشروعك بدل اختراع اسم جدول
-      غير موجود.
-    */
 
-    try {
+$('totalLinks').textContent =
+fmt(links.length);
 
-        const profile = await getCurrentProfile();
 
-        if (!profile) return;
+$('linkCountBadge').textContent =
+fmt(links.length);
 
-        /*
-          هنا سنربط الـ links بالـ schema الحقيقي
-          في الخطوة التالية.
-        */
 
-    } catch (error) {
+renderLinks(links);
 
-        console.error(error);
 
-    }
+await Promise.all([
+loadClickStats(),
+loadReferrals()
+]);
 
 }
 
 
+async function loadClickStats(){
+
+const ids =
+links.map(x => x.id);
+
+
+if(!ids.length){
+
+$('totalClicks').textContent = '0';
+
+$('todayClicks').textContent = '0';
+
+$('avgClicks').textContent = '0';
+
+$('uniqueVisitors').textContent = '0';
+
+$('chartTotal').textContent = '0';
+
+renderChart([]);
+
+return;
+
+}
+
+
+const {
+count:total,
+error:e1
+} =
+await sb
+.from('link_clicks')
+.select('id',{
+count:'exact',
+head:true
+})
+.in('link_id',ids);
+
+
+if(e1)
+console.warn(e1);
+
+
+const startToday =
+new Date();
+
+startToday.setHours(
+0,0,0,0
+);
+
+
+const {
+count:today,
+error:e2
+} =
+await sb
+.from('link_clicks')
+.select('id',{
+count:'exact',
+head:true
+})
+.in('link_id',ids)
+.gte(
+'created_at',
+startToday.toISOString()
+);
+
+
+if(e2)
+console.warn(e2);
+
+
+const from =
+new Date(
+Date.now() -
+7 * 86400000
+);
+
+
+const {
+data:recent,
+error:e3
+} =
+await sb
+.from('link_clicks')
+.select(
+'visitor_id,created_at,link_id'
+)
+.in('link_id',ids)
+.gte(
+'created_at',
+from.toISOString()
+)
+.order(
+'created_at',
+{
+ascending:false
+}
+)
+.limit(5000);
+
+
+if(e3)
+console.warn(e3);
+
+
+const totalNum =
+Number(total || 0);
+
+
+$('totalClicks').textContent =
+fmt(totalNum);
+
+
+$('todayClicks').textContent =
+fmt(today || 0);
+
+
+$('chartTotal').textContent =
+fmt(totalNum);
+
+
+$('avgClicks').textContent =
+fmt(
+links.length
+? totalNum / links.length
+: 0
+);
+
+
+$('uniqueVisitors').textContent =
+fmt(
+new Set(
+(recent || [])
+.map(x => x.visitor_id)
+.filter(Boolean)
+).size
+);
+
+
+const days = [];
+
+
+for(
+let i = 6;
+i >= 0;
+i--
+){
+
+const d = new Date();
+
+d.setHours(
+0,0,0,0
+);
+
+d.setDate(
+d.getDate() - i
+);
+
+days.push(d);
+
+}
+
+
+renderChart(
+
+days.map(d => {
+
+const next =
+new Date(d);
+
+next.setDate(
+next.getDate() + 1
+);
+
+
+const value =
+(recent || [])
+.filter(x => {
+
+const t =
+new Date(x.created_at);
+
+return t >= d &&
+t < next;
+
+})
+.length;
+
+
+return {
+
+label:
+d.toLocaleDateString(
+'ar-EG',
+{
+weekday:'short'
+}
+),
+
+value
+
+};
+
+})
+
+);
+
+}
+
+
+function renderChart(points){
+
+const svg =
+$('visitsChart');
+
+
+if(!points.length){
+
+svg.innerHTML = '';
+
+return;
+
+}
+
+
+const w = 700;
+
+const h = 220;
+
+const p = 24;
+
+
+const max =
+Math.max(
+1,
+...points.map(
+x => x.value
+)
+);
+
+
+const coords =
+points.map(
+(x,i) => ({
+
+x:
+p +
+i *
+(w - 2*p) /
+(points.length - 1 || 1),
+
+y:
+h -
+p -
+(x.value / max) *
+(h - 2*p)
+
+})
+);
+
+
+const poly =
+coords
+.map(
+c => `${c.x},${c.y}`
+)
+.join(' ');
+
+
+const area =
+`${p},${h-p} ${poly} ${w-p},${h-p}`;
+
+
+svg.innerHTML = `
+
+<defs>
+
+<linearGradient
+id="g"
+x1="0"
+y1="0"
+x2="0"
+y2="1"
+>
+
+<stop
+offset="0"
+stop-color="#704cff"
+stop-opacity=".35"
+/>
+
+<stop
+offset="1"
+stop-color="#704cff"
+stop-opacity="0"
+/>
+
+</linearGradient>
+
+</defs>
+
+
+<line
+x1="${p}"
+y1="${h-p}"
+x2="${w-p}"
+y2="${h-p}"
+stroke="rgba(255,255,255,.08)"
+/>
+
+
+<polygon
+points="${area}"
+fill="url(#g)"
+/>
+
+
+<polyline
+points="${poly}"
+fill="none"
+stroke="#8e63ff"
+stroke-width="4"
+stroke-linecap="round"
+stroke-linejoin="round"
+/>
+
+
+${coords.map(
+(c,i) => `
+
+<circle
+cx="${c.x}"
+cy="${c.y}"
+r="5"
+fill="#8e63ff"
+/>
+
+<text
+x="${c.x}"
+y="${Math.max(15,c.y-10)}"
+fill="#cbd0df"
+font-size="11"
+text-anchor="middle"
+>
+${fmt(points[i].value)}
+</text>
+
+<text
+x="${c.x}"
+y="${h-5}"
+fill="#68738c"
+font-size="10"
+text-anchor="middle"
+>
+${points[i].label}
+</text>
+
+`
+).join('')}
+
+`;
+
+}
+
+
+function renderLinks(list){
+
+const q =
+($('linkSearch').value || '')
+.trim()
+.toLowerCase();
+
+
+const filtered =
+list.filter(x =>
+
+(x.short_code || '')
+.toLowerCase()
+.includes(q)
+
+||
+
+(x.original_url || '')
+.toLowerCase()
+.includes(q)
+
+);
+
+
+if(!filtered.length){
+
+$('linksList').innerHTML =
+'<div class="empty-mini">لا توجد روابط مطابقة.</div>';
+
+return;
+
+}
+
+
+$('linksList').innerHTML =
+filtered
+.slice(0,10)
+.map(x => {
+
+const short =
+location.origin +
+'/' +
+x.short_code;
+
+
+return `
+
+<div class="link-row">
+
+<div class="code">
+
+${x.short_code}
+
+<button
+class="copy"
+data-copy="${short}"
+>
+نسخ
+</button>
+
+</div>
+
+<div class="dest">
+${x.original_url}
+</div>
+
+<div class="clicks">
+${fmt(x.clicks)} نقرة
+</div>
+
+</div>
+
+`;
+
+})
+.join('');
+
+
 document
-    .getElementById("createLinkBtn")
-    .addEventListener("click", async function() {
+.querySelectorAll('[data-copy]')
+.forEach(b => {
 
-        const url =
-            document.getElementById("longUrl").value.trim();
+b.onclick =
+async () => {
 
-        const alias =
-            document.getElementById("customAlias").value.trim();
+await navigator
+.clipboard
+.writeText(
+b.dataset.copy
+);
 
-        const message =
-            document.getElementById("modalMessage");
+toast('تم نسخ الرابط');
 
-        if (!url) {
+};
 
-            message.textContent =
-                "من فضلك أدخل الرابط.";
+});
 
-            return;
-        }
-
-        try {
-
-            new URL(url);
-
-        } catch {
-
-            message.textContent =
-                "الرابط غير صحيح.";
-
-            return;
-        }
-
-        message.textContent =
-            "واجهة الاختصار جاهزة، وسنربطها بدالة الاختصار الحالية بدون تغيير نظامك.";
-
-    });
+}
 
 
-document
-    .getElementById("menuBtn")
-    .addEventListener("click", function() {
+async function loadReferrals(){
 
-        document
-            .querySelector(".sidebar")
-            .classList.toggle("mobile-open");
+const {
+count
+} =
+await sb
+.from('profiles')
+.select(
+'id',
+{
+count:'exact',
+head:true
+}
+)
+.eq(
+'referred_by',
+profile.id
+);
 
-    });
+
+$('referralCount').textContent =
+fmt(count || 0);
 
 
-loadProfile();
-loadLinks();
+$('referralLink').textContent =
+location.origin +
+'/auth.html?ref=' +
+encodeURIComponent(
+profile.referral_code || ''
+);
+
+
+const {
+data
+} =
+await sb
+.from('referral_ledger')
+.select('bonus_amount')
+.eq(
+'referrer_id',
+profile.id
+);
+
+
+const earned =
+(data || [])
+.reduce(
+(s,x) =>
+s +
+Number(
+x.bonus_amount || 0
+),
+0
+);
+
+
+$('referralEarned').textContent =
+money(earned);
+
+}
+
+
+function openModal(){
+
+$('newLinkModal')
+.classList
+.remove('hidden');
+
+$('newUrl').focus();
+
+}
+
+
+function closeModal(){
+
+$('newLinkModal')
+.classList
+.add('hidden');
+
+$('modalMessage')
+.textContent = '';
+
+}
+
+
+async function createLink(){
+
+const url =
+$('newUrl')
+.value
+.trim();
+
+
+let alias =
+$('newAlias')
+.value
+.trim();
+
+
+const expiry =
+$('newExpiry')
+.value || null;
+
+
+if(
+!/^https?:\/\/.+/i.test(url)
+){
+
+$('modalMessage').textContent =
+'اكتب رابطًا صحيحًا يبدأ بـ http أو https.';
+
+return;
+
+}
+
+
+if(!alias){
+
+alias =
+crypto
+.randomUUID()
+.replaceAll('-','')
+.slice(0,8);
+
+}
+
+
+const {
+data:existing
+} =
+await sb
+.from('links')
+.select('id')
+.eq(
+'short_code',
+alias
+)
+.maybeSingle();
+
+
+if(existing){
+
+$('modalMessage').textContent =
+'الاسم مستخدم بالفعل.';
+
+return;
+
+}
+
+
+const {
+error
+} =
+await sb
+.from('links')
+.insert({
+
+short_code:alias,
+
+original_url:url,
+
+owner_id:profile.id,
+
+expires_at:
+expiry
+? new Date(expiry).toISOString()
+: null
+
+});
+
+
+if(error){
+
+console.error(error);
+
+$('modalMessage').textContent =
+'تعذر حفظ الرابط.';
+
+return;
+
+}
+
+
+closeModal();
+
+toast('تم إنشاء الرابط');
+
+
+$('newUrl').value = '';
+
+$('newAlias').value = '';
+
+$('newExpiry').value = '';
+
+
+await loadDashboard();
+
+}
+
+
+$('newLinkBtn')
+.onclick = openModal;
+
+
+$('desktopNewLink')
+.onclick = openModal;
+
+
+$('mobileNewLink')
+.onclick = openModal;
+
+
+$('closeModal')
+.onclick = closeModal;
+
+
+$('saveLink')
+.onclick = createLink;
+
+
+$('linkSearch')
+.addEventListener(
+'input',
+() => renderLinks(links)
+);
+
+
+$('topSearch')
+.addEventListener(
+'input',
+e => {
+
+$('linkSearch').value =
+e.target.value;
+
+renderLinks(links);
+
+location.hash =
+'links';
+
+});
+
+
+$('logoutDesktop')
+.onclick =
+async () => {
+
+await sb.auth.signOut();
+
+location.href =
+'index.html';
+
+};
+
+
+$('logoutMobileAlt')
+.onclick =
+async () => {
+
+await sb.auth.signOut();
+
+location.href =
+'index.html';
+
+};
+
+
+$('newLinkModal')
+.addEventListener(
+'click',
+e => {
+
+if(
+e.target.id ===
+'newLinkModal'
+)
+closeModal();
+
+}
+);
+
+
+loadDashboard();
 
 </script>
 
