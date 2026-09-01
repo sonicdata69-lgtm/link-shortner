@@ -1,10 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 export default async function handler(req, res) {
   try {
     const code = String(req.query.code || "").trim();
@@ -13,16 +6,31 @@ export default async function handler(req, res) {
       return res.status(404).send("الرابط غير موجود");
     }
 
-    const { data: link, error } = await supabase
-      .from("links")
-      .select("id, original_url, expires_at, clicks")
-      .eq("short_code", code)
-      .maybeSingle();
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (error) {
-      console.error(error);
-      return res.status(500).send("حدث خطأ");
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Supabase environment variables are missing");
+      return res.status(500).send("إعدادات قاعدة البيانات ناقصة");
     }
+
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/links?short_code=eq.${encodeURIComponent(code)}&select=id,original_url,expires_at,clicks&limit=1`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      console.error(await response.text());
+      return res.status(500).send("حدث خطأ في قاعدة البيانات");
+    }
+
+    const links = await response.json();
+    const link = links[0];
 
     if (!link) {
       return res.status(404).send("هذا الرابط غير موجود 😕");
@@ -40,17 +48,35 @@ export default async function handler(req, res) {
       req.headers["x-real-ip"] ||
       "unknown";
 
-    await supabase.from("link_clicks").insert({
-      link_id: link.id,
-      visitor_id: String(visitorId).split(",")[0].trim()
+    await fetch(`${supabaseUrl}/rest/v1/link_clicks`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify({
+        link_id: link.id,
+        visitor_id: String(visitorId).split(",")[0].trim()
+      })
     });
 
-    await supabase
-      .from("links")
-      .update({
-        clicks: Number(link.clicks || 0) + 1
-      })
-      .eq("id", link.id);
+    await fetch(
+      `${supabaseUrl}/rest/v1/links?id=eq.${encodeURIComponent(link.id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal"
+        },
+        body: JSON.stringify({
+          clicks: Number(link.clicks || 0) + 1
+        })
+      }
+    );
 
     return res.redirect(302, link.original_url);
 
