@@ -1,0 +1,7 @@
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/:code"
+  to = "/.netlify/functions/redirect?code=:code"
+  status = 200
